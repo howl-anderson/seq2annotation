@@ -1,0 +1,3 @@
+numpy
+tensorflow
+git+https://github.com/guillaumegenthial/tf_metrics.git

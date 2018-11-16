@@ -1,0 +1,3 @@
+tensorflow-serving-api
+requests
+git+https://github.com/guillaumegenthial/tf_metrics.git

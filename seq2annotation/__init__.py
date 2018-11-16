@@ -9,6 +9,8 @@ from seq2annotation.data_input.simple import input_fn as simple_input_fn
 from seq2annotation.data_input.simple import generator_fn as simple_generator_fn
 from seq2annotation.algorithms.BiLSTM_CRF import model_fn as bilstm_crf_model_fn
 
+tf.logging.set_verbosity(tf.logging.INFO)
+
 
 def train_model(**kwargs):
     data_dir = kwargs.pop('data_dir', '.')

@@ -2,3 +2,5 @@ tensorflow-serving-api
 requests
 tokenizer_tools
 git+https://github.com/guillaumegenthial/tf_metrics.git
+flask
+flask-cors

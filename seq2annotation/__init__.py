@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from seq2annotation.data_input.simple import input_fn as simple_input_fn
 from seq2annotation.data_input.simple import generator_fn as simple_generator_fn
-from seq2annotation.algorithms.BiLSTM_CRF import model_fn as bilstm_crf_model_fn
+from seq2annotation.algorithms.BiLSTM_CRF_model import BilstmCrfModel
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -17,7 +17,7 @@ def train_model(**kwargs):
     result_dir = kwargs.pop('result_dir', '.')
     input_fn = kwargs.pop('input_fn', simple_input_fn)
     generator_fn = kwargs.pop('generator_fn', simple_generator_fn)
-    model_fn = kwargs.pop('model_fn', bilstm_crf_model_fn)
+    model_fn = kwargs.pop('model_fn', BilstmCrfModel.model_fn)
 
     params = {
         'dim': 300,
@@ -54,7 +54,7 @@ def train_model(**kwargs):
         },
 
         'train_spec': {
-            'max_steps': 500
+            'max_steps': 5000
         },
         'eval_spec': {
             'throttle_secs': 120

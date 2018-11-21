@@ -1,5 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from tokenizer_tools.tagset.NER.BILUO import BILUOSequenceEncoderDecoder
+
+decoder = BILUOSequenceEncoderDecoder()
 
 
 app = Flask(__name__)
@@ -9,14 +12,16 @@ CORS(app)
 
 from tensorflow.contrib import predictor
 
-export_dir = 'results/saved_model/1540283398'
+export_dir = 'results/saved_model/1542732555'
 
 predict_fn = predictor.from_saved_model(export_dir)
 
 
-@app.route("/seq2annotation", methods=['GET'])
+@app.route("/parse", methods=['GET'])
 def single_tokenizer():
     text_msg = request.args.get('q')
+
+    print(text_msg)
 
     predictions = predict_fn(
         {
@@ -26,7 +31,18 @@ def single_tokenizer():
     )
     print(predictions['tags'])
 
-    return jsonify(predictions['tags'])
+    tags_seq = [i.decode() for i in predictions['tags'][0]]
+
+    offset_list = decoder.decode_to_offset(tags_seq)
+    print(offset_list)
+
+    response = {
+        'text': text_msg,
+        'spans': [{'start': i[0], 'end': i[1], 'type': i[2]} for i in offset_list],
+        'ents': list({i[2].lower() for i in offset_list})
+    }
+
+    return jsonify(response)
 
 
 if __name__ == "__main__":

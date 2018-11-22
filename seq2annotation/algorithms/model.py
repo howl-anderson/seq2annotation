@@ -30,14 +30,7 @@ class Model(object):
         # Word Embeddings
         words = tf.identity(self.features['words'], name='input_words')
         word_ids = vocab_words.lookup(words)
-        # glove = np.load(params['glove'])['embeddings']  # np.array
-        glove = np.zeros((128003, self.params['dim']), dtype=np.float32)
 
-        # Add OOV word embedding
-        variable = np.vstack([glove, [[0.] * self.params['dim']]])
-
-        variable = tf.Variable(variable, dtype=tf.float32, trainable=True)
-        embeddings = tf.nn.embedding_lookup(variable, word_ids)
 
         #
         # raw_nwords = tf.identity(features['words_len'], name='input_words_len')
@@ -64,7 +57,22 @@ class Model(object):
         else:
             true_tag_ids = self.tag2id(self.labels)
 
-        return indices, num_tags, embeddings, nwords, true_tag_ids
+        return indices, num_tags, word_ids, nwords, true_tag_ids
+
+    def embedding_layer(self, word_ids):
+        # load pre-trained data from file
+        # glove = np.load(params['glove'])['embeddings']  # np.array
+
+        # training the embedding during training
+        glove = np.zeros((self.params['embedding']['vocabulary_size'], self.params['dim']), dtype=np.float32)
+
+        # Add OOV word embedding
+        embedding_array = np.vstack([glove, [[0.] * self.params['dim']]])
+
+        embedding_variable = tf.Variable(embedding_array, dtype=tf.float32, trainable=True)
+        embeddings = tf.nn.embedding_lookup(embedding_variable, word_ids)
+
+        return embeddings
 
     def dropout_layer(self, data):
         training = (self.mode == tf.estimator.ModeKeys.TRAIN)
@@ -135,7 +143,9 @@ class Model(object):
         raise NotImplementedError
 
     def __call__(self):
-        indices, num_tags, embeddings, nwords, true_tag_ids = self.input_layer()
+        indices, num_tags, word_ids, nwords, true_tag_ids = self.input_layer()
+
+        embeddings = self.embedding_layer(word_ids)
 
         data = self.call(embeddings, nwords)
 

@@ -62,6 +62,11 @@ def train_model(**kwargs):
 
         'estimator': {
             'save_checkpoints_secs': 120
+        },
+
+
+        'embedding': {
+            'vocabulary_size': 128003
         }
     }
 

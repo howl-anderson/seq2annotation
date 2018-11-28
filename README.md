@@ -6,3 +6,4 @@
 ## More Algorithms To Do
 * https://www.cnblogs.com/Determined22/p/7238342.html
 * http://www.davidsbatista.net/blog/2018/05/09/Named_Entity_Evaluation/
+* http://www.voidcn.com/article/p-kvrmknrl-bgh.html

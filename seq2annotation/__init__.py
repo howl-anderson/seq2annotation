@@ -23,7 +23,7 @@ def train_model(**kwargs):
         'dim': 300,
         'dropout': 0.5,
         'num_oov_buckets': 1,
-        'epochs': 25,
+        'epochs': None,
         'batch_size': 20,
         'buffer': 15000,
         'lstm_size': 100,

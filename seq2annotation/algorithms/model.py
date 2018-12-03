@@ -51,13 +51,13 @@ class Model(object):
             indices = [idx for idx, tag in enumerate(f) if tag.strip() != 'O']
             num_tags = len(indices) + 1
 
-        # true tags to ids
-        if self.mode == tf.estimator.ModeKeys.PREDICT:
-            true_tag_ids = None
-        else:
-            true_tag_ids = self.tag2id(self.labels)
+        # # true tags to ids
+        # if self.mode == tf.estimator.ModeKeys.PREDICT:
+        #     true_tag_ids = 0
+        # else:
+        #     true_tag_ids = self.tag2id(self.labels)
 
-        return indices, num_tags, word_ids, nwords, true_tag_ids
+        return indices, num_tags, word_ids, nwords
 
     def embedding_layer(self, word_ids):
         # load pre-trained data from file
@@ -143,7 +143,7 @@ class Model(object):
         raise NotImplementedError
 
     def __call__(self):
-        indices, num_tags, word_ids, nwords, true_tag_ids = self.input_layer()
+        indices, num_tags, word_ids, nwords = self.input_layer()
 
         embeddings = self.embedding_layer(word_ids)
 
@@ -157,21 +157,24 @@ class Model(object):
 
         pred_ids = self.crf_decode_layer(logits, crf_params, nwords)
 
-        if self.mode == tf.estimator.ModeKeys.PREDICT:
-            pred_strings = self.id2tag(pred_ids)
-            predictions = {
-                'pred_ids': pred_ids,
-                'tags': pred_strings
-            }
+        pred_strings = self.id2tag(pred_ids)
+        predictions = {
+            'pred_ids': pred_ids,
+            'tags': pred_strings
+        }
 
+        if self.mode == tf.estimator.ModeKeys.PREDICT:
             return tf.estimator.EstimatorSpec(self.mode,
                                               predictions=predictions)
         else:
+            true_tag_ids = self.tag2id(self.labels)
+
             loss = self.loss_layer(logits, true_tag_ids, nwords, crf_params)
 
+            metrics = self.compute_metrics(true_tag_ids, pred_ids,
+                                           num_tags, indices, nwords)
+
             if self.mode == tf.estimator.ModeKeys.EVAL:
-                metrics = self.compute_metrics(true_tag_ids, pred_ids,
-                                               num_tags, indices, nwords)
                 return tf.estimator.EstimatorSpec(
                     self.mode, loss=loss, eval_metric_ops=metrics)
 

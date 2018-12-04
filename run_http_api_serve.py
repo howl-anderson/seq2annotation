@@ -1,3 +1,5 @@
+import sys
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from tokenizer_tools.tagset.NER.BILUO import BILUOSequenceEncoderDecoder
@@ -12,9 +14,14 @@ CORS(app)
 
 from tensorflow.contrib import predictor
 
-export_dir = 'results/saved_model/1542732555'
+predict_fn = None
 
-predict_fn = predictor.from_saved_model(export_dir)
+
+def load_predict_fn(export_dir):
+    global predict_fn
+    predict_fn = predictor.from_saved_model(export_dir)
+
+    return predict_fn
 
 
 @app.route("/parse", methods=['GET'])
@@ -46,4 +53,6 @@ def single_tokenizer():
 
 
 if __name__ == "__main__":
+    load_predict_fn(sys.argv[1])
+
     app.run(host='0.0.0.0', port=5000)

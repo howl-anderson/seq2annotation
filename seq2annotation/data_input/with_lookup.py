@@ -12,7 +12,7 @@ def input_fn(input_file, params=None, shuffle_and_repeat=False):
     defaults = (('<pad>', 0, 'O'), 'O')
 
     dataset = tf.data.Dataset.from_generator(
-        functools.partial(generator_fn, input_file),
+        functools.partial(generator_fn, input_file, params),
         output_shapes=shapes, output_types=types)
 
     if shuffle_and_repeat:

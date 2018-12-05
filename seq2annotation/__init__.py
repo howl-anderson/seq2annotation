@@ -5,7 +5,8 @@ from pathlib import Path
 
 import tensorflow as tf
 
-from seq2annotation.data_input.simple import input_fn as simple_input_fn
+# from seq2annotation.data_input.simple import input_fn as simple_input_fn
+from seq2annotation.data_input.with_lookup import input_fn as simple_input_fn
 from seq2annotation.data_input.simple import generator_fn as simple_generator_fn
 from seq2annotation.algorithms.BiLSTM_CRF_model import BilstmCrfModel
 
@@ -28,6 +29,7 @@ def train_model(**kwargs):
         'buffer': 15000,
         'lstm_size': 100,
         'words': str(Path(data_dir, './unicode_char_list.txt')),
+        'lookup': str(Path(data_dir, './lookup.txt')),
         'chars': str(Path(data_dir, 'vocab.chars.txt')),
         'tags': str(Path(data_dir, './tags.txt')),
         'glove': str(Path(data_dir, './glove.npz')),

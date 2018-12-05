@@ -8,6 +8,7 @@ Flask-Cors==3.0.7
 gast==0.2.0
 grpcio==1.15.0
 h5py==2.8.0
+hanzi-char-lookup-feature==0.1
 idna==2.7
 itsdangerous==1.1.0
 Jinja2==2.10
@@ -19,15 +20,16 @@ nlp-utils==0.1
 nltk==3.3
 numpy==1.15.2
 protobuf==3.6.1
+pygtrie==2.3
 requests==2.19.1
 scikit-learn==0.20.0
 scipy==1.1.0
 six==1.11.0
-tensorboard==1.11.0
-tensorflow==1.11.0
+tensorboard==1.12.0
+tensorflow==1.12.0
 tensorflow-serving-api==1.11.0
 termcolor==1.1.0
-git+https://github.com/guillaumegenthial/tf_metrics.git
-tokenizer_tools
+tf-metrics==0.0.1
+-e git+git@github.com:howl-anderson/tokenizer_tools.git@7e18e85fbc1dbc0235c6d7c0908b7aafe43117ad#egg=tokenizer_tools
 urllib3==1.23
 Werkzeug==0.14.1

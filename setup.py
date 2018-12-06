@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='seq2annotation',
     version='0.1',
-    packages=['seq2annotation', 'seq2annotation.algorithms', 'seq2annotation.data_input', 'seq2annotation.server'],
+    packages=['seq2annotation', 'seq2annotation.algorithms', 'seq2annotation.data_input', 'seq2annotation.server', 'seq2annotation.trainer'],
     url='',
     license='MIT',
     author='Xiaoquan Kong',

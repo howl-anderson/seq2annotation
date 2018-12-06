@@ -1,4 +1,4 @@
-from seq2annotation import train_model
+from seq2annotation.trainer.train_model import train_model
 from seq2annotation.algorithms.BiLSTM_CRF_model import BilstmCrfModel
 from seq2annotation.algorithms.IDCNN_CRF_model import IdcnnCrfModel
 

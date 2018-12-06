@@ -5,8 +5,8 @@ from pathlib import Path
 
 import tensorflow as tf
 
-# from seq2annotation.data_input.simple import input_fn as simple_input_fn
-from seq2annotation.data_input.with_lookup import input_fn as simple_input_fn
+from seq2annotation.data_input.simple import input_fn as simple_input_fn
+# from seq2annotation.data_input.with_lookup import input_fn as simple_input_fn
 from seq2annotation.data_input.simple import generator_fn as simple_generator_fn
 from seq2annotation.algorithms.BiLSTM_CRF_model import BilstmCrfModel
 

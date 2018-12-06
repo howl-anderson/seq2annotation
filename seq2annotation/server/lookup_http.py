@@ -3,6 +3,8 @@ import sys
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from tokenizer_tools.tagset.NER.BILUO import BILUOSequenceEncoderDecoder
+from hanzi_char_lookup_feature import load_trie_from_files, generate_lookup_feature
+
 
 decoder = BILUOSequenceEncoderDecoder()
 
@@ -15,6 +17,15 @@ CORS(app)
 from tensorflow.contrib import predictor
 
 predict_fn = None
+
+t = None
+
+
+def load_t(t_data):
+    global t
+    t = load_trie_from_files(
+        {'person': [t_data]}
+    )
 
 
 def load_predict_fn(export_dir):
@@ -30,9 +41,12 @@ def single_tokenizer():
 
     print(text_msg)
 
+    lookup_feature = generate_lookup_feature(t, text_msg, ['person'])
+
     input_feature = {
             'words': [[i for i in text_msg]],
             'words_len': [len(text_msg)],
+            'lookup': [lookup_feature['person']]
         }
 
     print(input_feature)
@@ -56,5 +70,7 @@ def single_tokenizer():
 
 if __name__ == "__main__":
     load_predict_fn(sys.argv[1])
+
+    load_t(sys.argv[2])
 
     app.run(host='0.0.0.0', port=5000)

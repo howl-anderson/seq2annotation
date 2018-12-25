@@ -6,7 +6,7 @@ from tf_metrics import precision, recall, f1
 from tokenizer_tools.tagset.NER.BILUO import BILUOEncoderDecoder
 
 
-class LookupModel(object):
+class NgramModel(object):
     @classmethod
     def default_params(cls):
         return {}
@@ -80,7 +80,7 @@ class LookupModel(object):
         feature_column = tf.feature_column.indicator_column(
             tf.feature_column.categorical_column_with_vocabulary_list(
                 key='lookup',
-                vocabulary_list=[True, False])
+                vocabulary_list=[0, 1])
         )
 
         encoded_feature = tf.feature_column.input_layer({'lookup': flat_feature}, [feature_column])
@@ -178,16 +178,17 @@ class LookupModel(object):
 
     def __call__(self):
         indices, num_tags, word_ids, nwords = self.input_layer()
-        lookup_feature = self.input_lookup_layer()
+        char_embeddings = self.embedding_layer(word_ids)
 
-        embeddings = self.embedding_layer(word_ids)
+        ngram_feature = self.features['lookup']
 
-        feature_data = tf.concat((embeddings, lookup_feature), axis=2)
+        char_feature_data = self.call(char_embeddings, nwords)
+        ngram_feature_data = self.call(ngram_feature, nwords)
 
-        data = self.call(feature_data, nwords)
+        feature_data = tf.concat((char_feature_data, ngram_feature_data), axis=2)
 
-        data = self.dropout_layer(data)
-        logits = self.dense_layer(data, num_tags)
+        feature_data_droped = self.dropout_layer(feature_data)
+        logits = self.dense_layer(feature_data_droped, num_tags)
 
         crf_params = tf.get_variable("crf", [num_tags, num_tags],
                                      dtype=tf.float32)

@@ -136,7 +136,7 @@ def train_model(**kwargs):
     feature_spec = {
         'words': tf.placeholder(tf.string, [None, None]),
         'words_len': tf.placeholder(tf.int32, [None]),
-        'lookup': tf.placeholder(tf.string, [None, None])
+        'lookup': tf.placeholder(tf.float32, [None, None, 6])
     }
     serving_input_receiver_fn = tf.estimator.export.build_raw_serving_input_receiver_fn(feature_spec)
     estimator.export_saved_model(

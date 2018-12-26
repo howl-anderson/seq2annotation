@@ -4,7 +4,7 @@ from hanzi_char_lookup_feature.n_gram_lookup.ngrams_feature import ngrams_featur
 from hanzi_char_lookup_feature.n_gram_lookup.ngrams_feature import generate_lookup_feature, load_data_set
 
 
-def parse_fn(word_tag_pairs, t):
+def parse_fn(word_tag_pairs, t, params):
     # Encode in Bytes for TF
     words = [i[0] for i in word_tag_pairs]
     tags = [i[1] for i in word_tag_pairs]
@@ -12,7 +12,7 @@ def parse_fn(word_tag_pairs, t):
 
     words_char = ''.join(words)
 
-    lookup_feature = generate_lookup_feature(words_char, 4, t, ['person'])
+    lookup_feature = generate_lookup_feature(words_char, 4, t, ['person'], dropout_rate=params['dropout_rate'])
 
     return (words, len(words), lookup_feature), tags
 
@@ -29,7 +29,7 @@ def generator_fn(input_file, params):
         # Encode in Bytes for TF
         word_tag_pairs = [(i[0], i[1]) for i in sentence]
 
-        yield parse_fn(word_tag_pairs, t)
+        yield parse_fn(word_tag_pairs, t, params)
 
 
 if __name__ == "__main__":

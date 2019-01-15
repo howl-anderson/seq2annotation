@@ -3,6 +3,7 @@ from pathlib import Path
 import tensorflow as tf
 import numpy as np
 from tf_metrics import precision, recall, f1
+from tokenizer_tools.metrics import correct_rate
 
 
 class Model(object):
@@ -132,6 +133,7 @@ class Model(object):
                                    weights),
             'recall': recall(tags, pred_ids, num_tags, indices, weights),
             'f1': f1(tags, pred_ids, num_tags, indices, weights),
+            'correct_rate': correct_rate(tags, pred_ids)
         }
 
         for metric_name, op in metrics.items():

@@ -2,7 +2,7 @@ import functools
 
 import tensorflow as tf
 
-from seq2annotation.data_input.char_level_conll import generator_fn
+from seq2annotation.data_input.char_level_conllz import generator_fn
 
 
 def input_fn(input_file, params=None, shuffle_and_repeat=False):

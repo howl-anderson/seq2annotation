@@ -3,6 +3,7 @@ import sys
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from tokenizer_tools.tagset.NER.BILUO import BILUOSequenceEncoderDecoder
+from tokenizer_tools.tagset.offset.sequence import Sequence
 
 decoder = BILUOSequenceEncoderDecoder()
 
@@ -14,14 +15,47 @@ CORS(app)
 
 from tensorflow.contrib import predictor
 
-predict_fn = None
+server = None
 
 
 def load_predict_fn(export_dir):
-    global predict_fn
-    predict_fn = predictor.from_saved_model(export_dir)
+    global server
+    server = Server(export_dir)
 
-    return predict_fn
+    return server
+
+
+class Server(object):
+    def __init__(self, model_dir):
+        self.model_dir = model_dir
+        self.predict_fn = predictor.from_saved_model(model_dir)
+
+    def serve(self, input_text, raise_exception=False):
+        input_feature = {
+            'words': [[i for i in input_text]],
+            'words_len': [len(input_text)],
+        }
+
+        predictions = self.predict_fn(input_feature)
+        tags = predictions['tags'][0]
+        # print(predictions['tags'])
+
+        # decode Unicode
+        tags_seq = [i.decode() for i in tags]
+
+        # BILUO to offset
+        try:
+            seq = decoder.to_offset(tags_seq, input_text)
+        except:
+            if not raise_exception:
+                # invalid tag sequence will raise exception
+                # so return a empty result
+                seq = Sequence(input_text)
+            else:
+                raise
+        # print(seq)
+
+        return seq, tags_seq
 
 
 @app.route("/parse", methods=['GET'])
@@ -30,25 +64,15 @@ def single_tokenizer():
 
     print(text_msg)
 
-    input_feature = {
-            'words': [[i for i in text_msg]],
-            'words_len': [len(text_msg)],
-        }
+    seq, tags = server.serve(text_msg)
 
-    print(input_feature)
-
-    predictions = predict_fn(input_feature)
-    print(predictions['tags'])
-
-    tags_seq = [i.decode() for i in predictions['tags'][0]]
-
-    offset_list = decoder.decode_to_offset(tags_seq)
-    print(offset_list)
+    print(tags)
+    # print(seq)
 
     response = {
         'text': text_msg,
-        'spans': [{'start': i[0], 'end': i[1], 'type': i[2]} for i in offset_list],
-        'ents': list({i[2].lower() for i in offset_list})
+        'spans': [{'start': i.start, 'end': i.end, 'type': i.entity} for i in seq.span_set],
+        'ents': list({i.entity.lower() for i in seq.span_set})
     }
 
     return jsonify(response)

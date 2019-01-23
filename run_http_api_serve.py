@@ -14,14 +14,9 @@ CORS(app)
 
 from tensorflow.contrib import predictor
 
-predict_fn = None
+export_dir = '/Users/howl/PyCharmProjects/seq2annotation_ner_on_people_daily/evaluate/results/saved_model/1543901916'
 
-
-def load_predict_fn(export_dir):
-    global predict_fn
-    predict_fn = predictor.from_saved_model(export_dir)
-
-    return predict_fn
+predict_fn = predictor.from_saved_model(export_dir)
 
 
 @app.route("/parse", methods=['GET'])
@@ -53,6 +48,4 @@ def single_tokenizer():
 
 
 if __name__ == "__main__":
-    load_predict_fn(sys.argv[1])
-
     app.run(host='0.0.0.0', port=5000)

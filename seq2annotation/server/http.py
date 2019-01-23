@@ -44,6 +44,7 @@ class Server(object):
         tags_seq = [i.decode() for i in tags]
 
         # BILUO to offset
+        failed = False
         try:
             seq = decoder.to_offset(tags_seq, input_text)
         except:
@@ -51,11 +52,12 @@ class Server(object):
                 # invalid tag sequence will raise exception
                 # so return a empty result
                 seq = Sequence(input_text)
+                failed = True
             else:
                 raise
         # print(seq)
 
-        return seq, tags_seq
+        return seq, tags_seq, failed
 
 
 @app.route("/parse", methods=['GET'])

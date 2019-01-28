@@ -92,6 +92,12 @@ class Model(object):
 
         return mapping_strings
 
+    def load_word_data(self):
+        data = np.loadtxt(self.params['words'], dtype=np.unicode, encoding=None)
+        mapping_strings = tf.Variable(data.reshape((-1,)))
+
+        return mapping_strings
+
     def tag2id(self, labels, name=None):
         mapping_strings = self.load_tag_data()
         vocab_tags = tf.contrib.lookup.index_table_from_tensor(mapping_strings, name=name)
@@ -108,6 +114,15 @@ class Model(object):
         pred_strings = reverse_vocab_tags.lookup(tf.to_int64(pred_ids))
 
         return pred_strings
+
+    def id2word(self, word_ids, name=None):
+        mapping_strings = self.load_word_data()
+        reverse_vocab_tags = tf.contrib.lookup.index_to_string_table_from_tensor(
+            mapping_strings, name=name)
+
+        word_strings = reverse_vocab_tags.lookup(tf.to_int64(word_ids))
+
+        return word_strings
 
     def loss_layer(self, preds, ground_true, nwords, crf_params):
         with tf.name_scope("CRF_log_likelihood"):
@@ -167,6 +182,10 @@ class Model(object):
 
         pred_strings = self.id2tag(pred_ids, name='predict')
 
+        word_strings = self.id2word(word_ids, name='word_strings')
+
+        # print(word_strings)
+
         predictions = {
             'pred_ids': pred_ids,
             'tags': pred_strings
@@ -178,8 +197,8 @@ class Model(object):
         else:
             true_tag_ids = self.tag2id(self.labels)
 
-            print(pred_strings)
-            print(self.labels)
+            # print(pred_strings)
+            # print(self.labels)
 
             loss = self.loss_layer(logits, true_tag_ids, nwords, crf_params)
 

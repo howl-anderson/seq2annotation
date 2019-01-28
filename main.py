@@ -6,7 +6,7 @@ from seq2annotation.algorithms.IDCNN_CRF_model import IdcnnCrfModel
 # train_model(data_dir='./data', result_dir='./result', model_fn=IdcnnCrfModel.model_fn, **IdcnnCrfModel.default_params())
 train_model(
     data_dir='./data', result_dir='./results',
-    train_spec={'max_steps': None},
+    train_spec={'max_steps': 1500},
     hook={
         'stop_if_no_increase': {
             'min_steps': 100,

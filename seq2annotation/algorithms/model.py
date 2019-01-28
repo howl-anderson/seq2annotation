@@ -92,18 +92,18 @@ class Model(object):
 
         return mapping_strings
 
-    def tag2id(self, labels):
+    def tag2id(self, labels, name=None):
         mapping_strings = self.load_tag_data()
-        vocab_tags = tf.contrib.lookup.index_table_from_tensor(mapping_strings)
+        vocab_tags = tf.contrib.lookup.index_table_from_tensor(mapping_strings, name=name)
 
         tags = vocab_tags.lookup(labels)
 
         return tags
 
-    def id2tag(self, pred_ids):
+    def id2tag(self, pred_ids, name=None):
         mapping_strings = self.load_tag_data()
         reverse_vocab_tags = tf.contrib.lookup.index_to_string_table_from_tensor(
-            mapping_strings)
+            mapping_strings, name=name)
 
         pred_strings = reverse_vocab_tags.lookup(tf.to_int64(pred_ids))
 
@@ -127,13 +127,19 @@ class Model(object):
 
     def compute_metrics(self, tags, pred_ids, num_tags, indices, nwords):
         weights = tf.sequence_mask(nwords)
+
+        # metrics_correct_rate, golden, predict = correct_rate(tags, pred_ids)
+        # metrics_correct_rate = correct_rate(tags, pred_ids, weights)
+
         metrics = {
             'acc': tf.metrics.accuracy(tags, pred_ids, weights),
             'precision': precision(tags, pred_ids, num_tags, indices,
                                    weights),
             'recall': recall(tags, pred_ids, num_tags, indices, weights),
             'f1': f1(tags, pred_ids, num_tags, indices, weights),
-            'correct_rate': correct_rate(tags, pred_ids)
+            'correct_rate': correct_rate(tags, pred_ids, weights),
+            # 'golden': (golden, tf.zeros([], tf.int32)),
+            # 'predict': (predict, tf.zeros([], tf.int32))
         }
 
         for metric_name, op in metrics.items():
@@ -159,7 +165,8 @@ class Model(object):
 
         pred_ids = self.crf_decode_layer(logits, crf_params, nwords)
 
-        pred_strings = self.id2tag(pred_ids)
+        pred_strings = self.id2tag(pred_ids, name='predict')
+
         predictions = {
             'pred_ids': pred_ids,
             'tags': pred_strings
@@ -170,6 +177,9 @@ class Model(object):
                                               predictions=predictions)
         else:
             true_tag_ids = self.tag2id(self.labels)
+
+            print(pred_strings)
+            print(self.labels)
 
             loss = self.loss_layer(logits, true_tag_ids, nwords, crf_params)
 

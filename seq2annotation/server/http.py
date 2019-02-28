@@ -66,7 +66,7 @@ def single_tokenizer():
 
     print(text_msg)
 
-    seq, tags = server.serve(text_msg)
+    seq, tags, failed = server.serve(text_msg)
 
     print(tags)
     # print(seq)

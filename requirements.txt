@@ -1,3 +1,4 @@
+ray
 absl-py==0.5.0
 astor==0.7.1
 certifi==2018.8.24

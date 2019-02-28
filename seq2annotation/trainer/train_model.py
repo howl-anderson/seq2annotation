@@ -1,6 +1,7 @@
 import copy
 import functools
 import json
+import os
 from pathlib import Path
 
 import tensorflow as tf
@@ -9,8 +10,29 @@ from seq2annotation.data_input.simple import input_fn as simple_input_fn
 # from seq2annotation.data_input.with_lookup import input_fn as simple_input_fn
 from seq2annotation.data_input.simple import generator_fn as simple_generator_fn
 from seq2annotation.algorithms.BiLSTM_CRF_model import BilstmCrfModel
+from tokenizer_tools.hooks import TensorObserveHook
+
 
 tf.logging.set_verbosity(tf.logging.INFO)
+
+observer_hook = TensorObserveHook(
+    {
+        'fake_golden': 'fake_golden:0',
+        'fake_prediction': 'fake_prediction:0'
+    },
+    {
+        "word_str": "word_strings_Lookup:0",
+        "predictions_id": "predictions:0",
+        "predict_str": "predict_Lookup:0",
+        "labels_id": "labels:0",
+        "labels_str": "IteratorGetNext:2",
+    },
+    {
+        "word_str": lambda x: x.decode(),
+        'predict_str': lambda x: x.decode(),
+        'labels_str': lambda x: x.decode()
+    }
+)
 
 
 def train_model(**kwargs):
@@ -18,7 +40,9 @@ def train_model(**kwargs):
     result_dir = kwargs.pop('result_dir', '.')
     input_fn = kwargs.pop('input_fn', simple_input_fn)
     generator_fn = kwargs.pop('generator_fn', simple_generator_fn)
-    model_fn = kwargs.pop('model_fn', BilstmCrfModel.model_fn)
+    model = kwargs.pop('model', None)
+    model_name = kwargs.pop('model_name', None)
+    model_fn = kwargs.pop('model_fn') if kwargs.get('model_fn') else getattr(model, 'model_fn')
 
     params = {
         'dim': 300,
@@ -45,6 +69,8 @@ def train_model(**kwargs):
             'test': str(Path(result_dir, '{}.txt'.format('preds_test'))),
         },
 
+        'optimizer_params': {},
+
         'saved_model_dir': str(Path(result_dir, 'saved_model')),
 
         'hook': {
@@ -59,7 +85,7 @@ def train_model(**kwargs):
             'max_steps': 5000
         },
         'eval_spec': {
-            'throttle_secs': 120
+            'throttle_secs': 60
         },
 
         'estimator': {
@@ -97,7 +123,17 @@ def train_model(**kwargs):
 
     cfg = tf.estimator.RunConfig(save_checkpoints_secs=params['estimator']['save_checkpoints_secs'])
 
-    estimator = tf.estimator.Estimator(model_fn, params['model_dir'], cfg, estimator_params)
+    model_specific_name = '{model_name}-{batch_size}-{learning_rate}-{max_steps}-{max_steps_without_increase}'.format(
+        model_name=model_name if model_name else model.get_model_name(),
+        batch_size=params['batch_size'],
+        learning_rate=params['optimizer_params'].get('learning_rate'),
+        max_steps=params['train_spec'].get('max_steps'),
+        max_steps_without_increase=params['hook'].get('max_steps_without_increase')
+    )
+
+    instance_model_dir = os.path.join(params['model_dir'], model_specific_name)
+
+    estimator = tf.estimator.Estimator(model_fn, instance_model_dir, cfg, estimator_params)
     Path(estimator.eval_dir()).mkdir(parents=True, exist_ok=True)
 
     hook_params = params['hook']['stop_if_no_increase']
@@ -109,8 +145,8 @@ def train_model(**kwargs):
     )
 
     train_spec = tf.estimator.TrainSpec(input_fn=train_inpf, hooks=[hook], max_steps=params['train_spec']['max_steps'])
-    eval_spec = tf.estimator.EvalSpec(input_fn=eval_inpf, throttle_secs=params['eval_spec']['throttle_secs'])
-    tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
+    eval_spec = tf.estimator.EvalSpec(input_fn=eval_inpf, throttle_secs=params['eval_spec']['throttle_secs'], hooks=[observer_hook])
+    evaluate_result, export_results = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
     # estimator.train(input_fn=train_inpf, hooks=[hook])
 
     # Write predictions to file
@@ -142,3 +178,5 @@ def train_model(**kwargs):
         params['saved_model_dir'],
         serving_input_receiver_fn,
     )
+
+    return evaluate_result, export_results

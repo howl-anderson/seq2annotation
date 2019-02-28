@@ -12,6 +12,10 @@ class Model(object):
         return {}
 
     @classmethod
+    def get_model_name(cls):
+        return cls.__name__
+
+    @classmethod
     def model_fn(cls, features, labels, mode, params):
         instance = cls(features, labels, mode, params)
         return instance()
@@ -210,7 +214,7 @@ class Model(object):
                     self.mode, loss=loss, eval_metric_ops=metrics)
 
             elif self.mode == tf.estimator.ModeKeys.TRAIN:
-                train_op = tf.train.AdamOptimizer().minimize(
+                train_op = tf.train.AdamOptimizer(**self.params.get('optimizer_params', {})).minimize(
                     loss, global_step=tf.train.get_or_create_global_step())
                 return tf.estimator.EstimatorSpec(
                     self.mode, loss=loss, train_op=train_op)

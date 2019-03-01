@@ -9,7 +9,6 @@ Flask-Cors==3.0.7
 gast==0.2.0
 grpcio==1.15.0
 h5py==2.8.0
-hanzi-char-lookup-feature==0.1
 idna==2.7
 itsdangerous==1.1.0
 Jinja2==2.10

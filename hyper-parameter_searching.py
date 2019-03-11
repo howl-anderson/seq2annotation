@@ -34,7 +34,7 @@ all_trials = tune.run_experiments({
     "my_experiment": {
         "run": train_func,
         "stop": {"mean_accuracy": 0.96},
-        "config": {"momentum": tune.grid_search(np.linspace(0.01, 0.0001, num=30).tolist())},
+        "config": {"momentum": tune.grid_search(np.linspace(0.001, 0.0001, num=30).tolist())},
         "trial_resources": {
             "cpu": 7,
             "gpu": 1

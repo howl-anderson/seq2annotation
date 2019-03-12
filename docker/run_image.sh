@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker rum --publish 5000:5000 --volume /model:/Users/howl/PyCharmProjects/seq2annotation_ner_on_ecarx/results/saved_model/1549978457 --name ner ner
+docker run -p 5000:5000 -v /home/howl/workshop/seq2annotation/results/saved_model/1551737828:/model ner:0.0.1

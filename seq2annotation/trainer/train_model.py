@@ -6,6 +6,7 @@ from pathlib import Path
 
 import tensorflow as tf
 
+from seq2annotation import utils
 from seq2annotation.data_input.simple import input_fn as simple_input_fn
 # from seq2annotation.data_input.with_lookup import input_fn as simple_input_fn
 from seq2annotation.data_input.simple import generator_fn as simple_generator_fn
@@ -173,9 +174,14 @@ def train_model(**kwargs):
         'words': tf.placeholder(tf.string, [None, None]),
         'words_len': tf.placeholder(tf.int32, [None]),
     }
+
+    instance_saved_dir = os.path.join(params['saved_model_dir'], model_specific_name)
+
+    utils.create_dir_if_needed(instance_saved_dir)
+
     serving_input_receiver_fn = tf.estimator.export.build_raw_serving_input_receiver_fn(feature_spec)
     estimator.export_saved_model(
-        params['saved_model_dir'],
+        instance_saved_dir,
         serving_input_receiver_fn,
     )
 

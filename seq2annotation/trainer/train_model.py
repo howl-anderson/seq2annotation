@@ -62,8 +62,8 @@ def train_model(**kwargs):
         'model_dir': str(Path(result_dir, 'model_dir')),
         'params_log_file': str(Path(result_dir, 'params.json')),
 
-        'train': str(Path(data_dir, '{}.txt'.format('train'))),
-        'test': str(Path(data_dir, '{}.txt'.format('test'))),
+        'train': str(Path(data_dir, '{}.conllz'.format('train'))),
+        'test': str(Path(data_dir, '{}.conllz'.format('test'))),
 
         'preds': {
             'train': str(Path(result_dir, '{}.txt'.format('preds_train'))),

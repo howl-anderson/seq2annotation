@@ -35,6 +35,25 @@ from seq2annotation.data_input.char_level_conllz import generator_fn
 #     return {'words': feature[0], 'words_len': feature[1]}, label
 
 
+def index_table_from_file(vocabulary_file=None):
+    index_table = {}
+    index_counter = 0
+    with open(vocabulary_file) as fd:
+        for line in fd:
+            key = line.strip()
+            index_table[key] = index_counter
+            index_counter += 1
+
+    class Lookuper(object):
+        def __init__(self, index_table):
+            self.index_table = index_table
+
+        def lookup(self, string):
+            return
+
+    return Lookuper(index_table)
+
+
 def input_fn(params=None, input_file=None, config=None, shuffle_and_repeat=False):
     config = config if config is not None else {}
     shapes = (([None], ()), [None])
@@ -51,6 +70,10 @@ def input_fn(params=None, input_file=None, config=None, shuffle_and_repeat=False
     dataset = (dataset
                .padded_batch(params['batch_size'], shapes, defaults, drop_remainder=config['use_tpu'])
                .prefetch(1))
+
+    words_index_table = index_table_from_file(config['words'])
+    tags_index_table = index_table_from_file(config['words'])
+    dataset = dataset.map(lambda x: ((words_index_table.lookup(x[0][0]), x[0][1]), tags_index_table.lookup(x[1])))
 
     feature, label = dataset.make_one_shot_iterator().get_next()
 

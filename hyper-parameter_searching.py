@@ -24,6 +24,7 @@ def train_func(config, reporter):
         },
         model=BilstmCrfModel,
         optimizer_params={'learning_rate': config['momentum']},
+        dropout=config['dropout'],
         **BilstmCrfModel.default_params(),
     )
 
@@ -34,7 +35,10 @@ all_trials = tune.run_experiments({
     "my_experiment": {
         "run": train_func,
         "stop": {"mean_accuracy": 0.96},
-        "config": {"momentum": tune.grid_search(np.linspace(0.001, 0.0001, num=30).tolist())},
+        "config": {
+            "momentum": tune.grid_search(np.linspace(0.001, 0.0001, num=30).tolist()),
+            "dropout": tune.grid_search(np.linspace(0.001, 0.999, num=10).tolist())
+        },
         "trial_resources": {
             "cpu": 7,
             "gpu": 1

@@ -73,7 +73,7 @@ def input_fn(params=None, input_file=None, config=None, shuffle_and_repeat=False
 
     words_index_table = index_table_from_file(config['words'])
     tags_index_table = index_table_from_file(config['words'])
-    dataset = dataset.map(lambda x: ((words_index_table.lookup(x[0][0]), x[0][1]), tags_index_table.lookup(x[1])))
+    dataset = dataset.map(lambda x, y: ((words_index_table.lookup(x[0]), x[1]), tags_index_table.lookup(y)))
 
     feature, label = dataset.make_one_shot_iterator().get_next()
 

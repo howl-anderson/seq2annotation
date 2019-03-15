@@ -49,7 +49,7 @@ def index_table_from_file(vocabulary_file=None):
             self.index_table = index_table
 
         def lookup(self, string):
-            return
+            return self.index_table(string)
 
     return Lookuper(index_table)
 

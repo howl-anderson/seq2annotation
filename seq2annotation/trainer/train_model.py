@@ -2,7 +2,6 @@ import copy
 import functools
 import json
 import os
-from pathlib import Path
 
 import tensorflow as tf
 
@@ -53,26 +52,26 @@ def train_model(**kwargs):
         'batch_size': 20,
         'buffer': 15000,
         'lstm_size': 100,
-        'words': str(Path(data_dir, './unicode_char_list.txt')),
-        'lookup': str(Path(data_dir, './lookup.txt')),
-        'chars': str(Path(data_dir, 'vocab.chars.txt')),
-        'tags': str(Path(data_dir, './tags.txt')),
-        'glove': str(Path(data_dir, './glove.npz')),
+        'words': utils.join_path(data_dir, './unicode_char_list.txt'),
+        'lookup': utils.join_path(data_dir, './lookup.txt'),
+        'chars': utils.join_path(data_dir, 'vocab.chars.txt'),
+        'tags': utils.join_path(data_dir, './tags.txt'),
+        'glove': utils.join_path(data_dir, './glove.npz'),
 
-        'model_dir': str(Path(result_dir, 'model_dir')),
-        'params_log_file': str(Path(result_dir, 'params.json')),
+        'model_dir': utils.join_path(result_dir, 'model_dir'),
+        'params_log_file': utils.join_path(result_dir, 'params.json'),
 
-        'train': str(Path(data_dir, '{}.conllz'.format('train'))),
-        'test': str(Path(data_dir, '{}.conllz'.format('test'))),
+        'train': utils.join_path(data_dir, '{}.conllz'.format('train')),
+        'test': utils.join_path(data_dir, '{}.conllz'.format('test')),
 
         'preds': {
-            'train': str(Path(result_dir, '{}.txt'.format('preds_train'))),
-            'test': str(Path(result_dir, '{}.txt'.format('preds_test'))),
+            'train': utils.join_path(result_dir, '{}.txt'.format('preds_train')),
+            'test': utils.join_path(result_dir, '{}.txt'.format('preds_test')),
         },
 
         'optimizer_params': {},
 
-        'saved_model_dir': str(Path(result_dir, 'saved_model')),
+        'saved_model_dir': utils.join_path(result_dir, 'saved_model'),
 
         'hook': {
             'stop_if_no_increase': {

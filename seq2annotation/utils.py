@@ -1,3 +1,5 @@
+import os
+
 import tensorflow as tf
 
 
@@ -8,3 +10,7 @@ def create_dir_if_needed(directory):
     if not tf.io.gfile.exists(directory):
         # os.makedirs(directory)
         tf.io.gfile.makedirs(directory)
+
+
+def join_path(a, b):
+    return os.path.join(a, b)

@@ -157,11 +157,15 @@ def train_model(**kwargs):
 
         tpu_estimator_params = copy.deepcopy(estimator_params)
         # remove reserved keys
-        tpu_estimator_params['train_batch_size'] = tpu_estimator_params['batch_size']
+        # tpu_estimator_params['train_batch_size'] = tpu_estimator_params['batch_size']
         del tpu_estimator_params['batch_size']
         # del tpu_estimator_params['context']
 
-        estimator = tf.contrib.tpu.TPUEstimator(model_fn=model_fn, params=tpu_estimator_params, config=run_config, use_tpu=True)
+        estimator = tf.contrib.tpu.TPUEstimator(model_fn=model_fn, params=tpu_estimator_params, config=run_config, use_tpu=True,
+                                                train_batch_size=estimator_params['batch_size'],
+                                                eval_batch_size=estimator_params['batch_size'],
+                                                predict_batch_size=estimator_params['batch_size']
+                                                )
     else:
         estimator = tf.estimator.Estimator(model_fn, instance_model_dir, cfg, estimator_params)
 

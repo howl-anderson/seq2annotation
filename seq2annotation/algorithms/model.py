@@ -196,8 +196,13 @@ class Model(object):
         }
 
         if self.mode == tf.estimator.ModeKeys.PREDICT:
-            return tf.estimator.EstimatorSpec(self.mode,
-                                              predictions=predictions)
+            if self.params['use_tpu']:
+                return tf.contrib.tpu.TPUEstimatorSpec(
+                    self.mode, predictions=predictions
+                )
+            else:
+                return tf.estimator.EstimatorSpec(self.mode,
+                                                  predictions=predictions)
         else:
             true_tag_ids = self.tag2id(self.labels)
 
@@ -210,11 +215,27 @@ class Model(object):
                                            num_tags, indices, nwords)
 
             if self.mode == tf.estimator.ModeKeys.EVAL:
-                return tf.estimator.EstimatorSpec(
-                    self.mode, loss=loss, eval_metric_ops=metrics)
+                if self.params['use_tpu']:
+                    def my_metric_fn(true_tag_ids, pred_ids, num_tags, indices, nwords):
+                        return self.compute_metrics(true_tag_ids, pred_ids, num_tags, indices, nwords)
+
+                    return tf.contrib.tpu.TPUEstimatorSpec(
+                        self.mode, loss=loss, eval_metrics=(my_metric_fn, [true_tag_ids, pred_ids, num_tags, indices, nwords])
+                    )
+                else:
+                    return tf.estimator.EstimatorSpec(
+                        self.mode, loss=loss, eval_metric_ops=metrics)
 
             elif self.mode == tf.estimator.ModeKeys.TRAIN:
                 train_op = tf.train.AdamOptimizer(**self.params.get('optimizer_params', {})).minimize(
                     loss, global_step=tf.train.get_or_create_global_step())
-                return tf.estimator.EstimatorSpec(
-                    self.mode, loss=loss, train_op=train_op)
+                if self.params['use_tpu']:
+                    train_op = tf.contrib.tpu.CrossShardOptimizer(train_op)
+
+                if self.params['use_tpu']:
+                    return tf.contrib.tpu.TPUEstimatorSpec(
+                        self.mode, loss=loss, train_op=train_op
+                    )
+                else:
+                    return tf.estimator.EstimatorSpec(
+                        self.mode, loss=loss, train_op=train_op)

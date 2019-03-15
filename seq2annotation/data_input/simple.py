@@ -49,7 +49,7 @@ def input_fn(params=None, input_file=None, config=None, shuffle_and_repeat=False
         dataset = dataset.shuffle(config['buffer']).repeat(config['epochs'])
 
     dataset = (dataset
-               .padded_batch(config.get('batch_size', 20), shapes, defaults)
+               .padded_batch(params['batch_size'], shapes, defaults, drop_remainder=config['use_tpu'])
                .prefetch(1))
 
     feature, label = dataset.make_one_shot_iterator().get_next()

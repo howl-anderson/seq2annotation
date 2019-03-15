@@ -118,9 +118,9 @@ def train_model(**kwargs):
         return params['preds'][name]
 
     # Estimator, train and evaluate
-    train_inpf = functools.partial(input_fn, fwords('train'),
-                                   params, shuffle_and_repeat=True)
-    eval_inpf = functools.partial(input_fn, fwords('test'))
+    train_inpf = functools.partial(input_fn, input_file=fwords('train'),
+                                   config=params, shuffle_and_repeat=True)
+    eval_inpf = functools.partial(input_fn, input_file=fwords('test'))
 
     estimator_params = copy.deepcopy(params)
     # estimator_params.update({

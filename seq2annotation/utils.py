@@ -1,4 +1,5 @@
 import os
+import pathlib
 
 import tensorflow as tf
 
@@ -13,4 +14,4 @@ def create_dir_if_needed(directory):
 
 
 def join_path(a, b):
-    return os.path.join(a, b)
+    return os.path.join(a, str(pathlib.PurePosixPath(b)))

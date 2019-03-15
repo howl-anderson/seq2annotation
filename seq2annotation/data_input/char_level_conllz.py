@@ -1,4 +1,5 @@
 from tokenizer_tools.conllz.reader import read_conllz
+import tensorflow as tf
 
 
 def parse_fn(word_tag_pairs):
@@ -14,7 +15,7 @@ def generator_fn(input_file):
     #     for line_words, line_tags in zip(f_words, f_tags):
     #         yield parse_fn(line_words, line_tags)
 
-    with open(input_file) as fd:
+    with tf.io.gfile.GFile(input_file) as fd:
         sentence_list = read_conllz(fd)
 
     for sentence in sentence_list:

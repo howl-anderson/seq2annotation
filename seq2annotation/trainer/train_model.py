@@ -96,13 +96,20 @@ def train_model(**kwargs):
 
         'embedding': {
             'vocabulary_size': 128003
+        },
+
+        'use_tpu': False,
+        'tpu_config': {
+            'tpu_name': None,
+            'zone': None,
+            'gcp_project': None
         }
     }
 
     # update from kwargs
     params.update(kwargs)
 
-    with open(params['params_log_file'], 'w') as f:
+    with tf.io.gfile.GFile(params['params_log_file'], 'w') as f:
         json.dump(params, f, indent=4, sort_keys=True)
 
     def fwords(name):
@@ -134,8 +141,29 @@ def train_model(**kwargs):
 
     instance_model_dir = os.path.join(params['model_dir'], model_specific_name)
 
-    estimator = tf.estimator.Estimator(model_fn, instance_model_dir, cfg, estimator_params)
-    Path(estimator.eval_dir()).mkdir(parents=True, exist_ok=True)
+    if params['use_tpu']:
+        tpu_cluster_resolver = tf.contrib.cluster_resolver.TPUClusterResolver(
+            tpu=params['tpu_config']['tpu_name'],
+            zone=params['tpu_config']['zone'],
+            project=params['tpu_config']['gcp_project']
+        )
+
+        run_config = tf.contrib.tpu.RunConfig(
+            cluster=tpu_cluster_resolver,
+            model_dir=instance_model_dir,
+            session_config=tf.ConfigProto(
+                allow_soft_placement=True, log_device_placement=True),
+            tpu_config=tf.contrib.tpu.TPUConfig(),
+        )
+
+        estimator = tf.contrib.tpu.TPUEstimator(model_fn=model_fn, params=estimator_params, config=run_config)
+    else:
+        estimator = tf.estimator.Estimator(model_fn, instance_model_dir, cfg, estimator_params)
+
+
+    # Path(estimator.eval_dir()).mkdir(parents=True, exist_ok=True)
+    utils.create_dir_if_needed(estimator.eval_dir())
+
 
     hook_params = params['hook']['stop_if_no_increase']
     hook = tf.contrib.estimator.stop_if_no_increase_hook(
@@ -153,7 +181,7 @@ def train_model(**kwargs):
     # Write predictions to file
     def write_predictions(name):
         output_file = preds_file(name)
-        with open(output_file, 'wt') as f:
+        with tf.io.gfile.GFile(output_file, 'wt') as f:
             test_inpf = functools.partial(input_fn, fwords(name))
             golds_gen = generator_fn(fwords(name))
             preds_gen = estimator.predict(test_inpf)

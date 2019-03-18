@@ -124,12 +124,13 @@ def train_model(**kwargs):
 
     cfg = tf.estimator.RunConfig(save_checkpoints_secs=params['estimator']['save_checkpoints_secs'])
 
-    model_specific_name = '{model_name}-{batch_size}-{learning_rate}-{max_steps}-{max_steps_without_increase}'.format(
+    model_specific_name = '{model_name}-{batch_size}-{learning_rate}-{dropout}-{max_steps}-{max_steps_without_increase}'.format(
         model_name=model_name if model_name else model.get_model_name(),
         batch_size=params['batch_size'],
         learning_rate=params['optimizer_params'].get('learning_rate'),
         max_steps=params['train_spec'].get('max_steps'),
-        max_steps_without_increase=params['hook'].get('max_steps_without_increase')
+        max_steps_without_increase=params['hook'].get('max_steps_without_increase'),
+        dropout=params['dropout']
     )
 
     instance_model_dir = os.path.join(params['model_dir'], model_specific_name)

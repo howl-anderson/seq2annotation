@@ -178,8 +178,9 @@ class Model(object):
             # 'predict': (predict, tf.zeros([], tf.int32))
         }
 
-        for metric_name, op in metrics.items():
-            tf.summary.scalar(metric_name, op[1])
+        # maybe related to "Cannot use 'precision' as input to 'Merge_2/MergeSummary' because 'precision' is in a while loop."
+        # for metric_name, op in metrics.items():
+        #     tf.summary.scalar(metric_name, op[1])
 
         return metrics
 

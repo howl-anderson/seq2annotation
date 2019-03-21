@@ -244,11 +244,11 @@ class Model(object):
                         self.mode, loss=loss, eval_metric_ops=metrics)
 
             elif self.mode == tf.estimator.ModeKeys.TRAIN:
-                train_op = tf.train.AdamOptimizer(**self.params.get('optimizer_params', {})).minimize(
-                    loss, global_step=tf.train.get_or_create_global_step())
+                optimizer = tf.train.AdamOptimizer(**self.params.get('optimizer_params', {}))
                 if self.params['use_tpu']:
-                    train_op = tf.contrib.tpu.CrossShardOptimizer(train_op)
+                    optimizer = tf.contrib.tpu.CrossShardOptimizer(optimizer)
 
+                train_op = optimizer.minimize(loss, global_step=tf.train.get_or_create_global_step())
                 if self.params['use_tpu']:
                     return tf.contrib.tpu.TPUEstimatorSpec(
                         self.mode, loss=loss, train_op=train_op

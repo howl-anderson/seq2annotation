@@ -81,7 +81,8 @@ def parse_to_dataset(data_generator_func, config=None, shuffle_and_repeat=False)
     # dataset = dataset.map(lambda x, y: ((words_index_table.lookup(x[0]), x[1]), tags_index_table.lookup(y)))
 
     dataset = (dataset
-               .padded_batch(config['batch_size'], shapes, defaults)
+               .padded_batch(config['batch_size'], shapes, defaults,
+                             drop_remainder=True)  #  drop_remainder needed by TPU
                .prefetch(1))
 
     return dataset

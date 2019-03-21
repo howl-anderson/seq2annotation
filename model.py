@@ -35,7 +35,7 @@ class TpuModel(object):
             train_inpf=train_inpf,
             eval_inpf=eval_inpf,
             forced_saved_model_dir=saved_model_dir,
-            data_dir='./data', result_dir='gs://ecarx/results',
+            data_dir='gs://ecarx/data', result_dir='gs://ecarx/results',
             train_spec={'max_steps': 150000},
             use_tpu=True,
             batch_size=1024,

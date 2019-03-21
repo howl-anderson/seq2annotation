@@ -136,7 +136,7 @@ def train_model(**kwargs):
     # })
 
     # get tag info
-    with Path(params['tags']).open() as f:
+    with tf.io.gfile.GFile(params['tags'], 'r') as f:
         indices = [idx for idx, tag in enumerate(f) if tag.strip() != 'O']
         num_tags = len(indices) + 1
 

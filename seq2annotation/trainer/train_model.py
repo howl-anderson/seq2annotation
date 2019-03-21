@@ -2,6 +2,7 @@ import copy
 import functools
 import json
 import os
+from pathlib import Path
 
 import tensorflow as tf
 
@@ -21,7 +22,7 @@ observer_hook = TensorObserveHook(
         'fake_prediction': 'fake_prediction:0'
     },
     {
-        "word_str": "word_strings_Lookup:0",
+        # "word_str": "word_strings_Lookup:0",
         "predictions_id": "predictions:0",
         "predict_str": "predict_Lookup:0",
         "labels_id": "labels:0",
@@ -108,6 +109,9 @@ def train_model(**kwargs):
     # update from kwargs
     params.update(kwargs)
 
+    train_inpf = params.pop('train_inpf')
+    eval_inpf = params.pop('eval_inpf')
+
     with tf.io.gfile.GFile(params['params_log_file'], 'w') as f:
         json.dump(params, f, indent=4, sort_keys=True)
 
@@ -118,15 +122,26 @@ def train_model(**kwargs):
         return params['preds'][name]
 
     # Estimator, train and evaluate
-    train_inpf = functools.partial(input_fn, input_file=fwords('train'),
-                                   config=params, shuffle_and_repeat=True)
-    eval_inpf = functools.partial(input_fn, input_file=fwords('test'))
+    if not train_inpf:
+        train_inpf = functools.partial(input_fn, input_file=fwords('train'),
+                                       config=params, shuffle_and_repeat=True)
+        
+    if not eval_inpf:
+        eval_inpf = functools.partial(input_fn, input_file=fwords('test'))
 
     estimator_params = copy.deepcopy(params)
     # estimator_params.update({
     #     'words_feature_columns': words_feature_columns,
     #     'words_len_feature_columns': words_len_feature_columns
     # })
+
+    # get tag info
+    with Path(params['tags']).open() as f:
+        indices = [idx for idx, tag in enumerate(f) if tag.strip() != 'O']
+        num_tags = len(indices) + 1
+
+        estimator_params['indices'] = indices
+        estimator_params['num_tags'] = num_tags
 
     cfg = tf.estimator.RunConfig(save_checkpoints_secs=params['estimator']['save_checkpoints_secs'])
 
@@ -187,39 +202,42 @@ def train_model(**kwargs):
     evaluate_result, export_results = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
     # estimator.train(input_fn=train_inpf, hooks=[hook])
 
-    # Write predictions to file
-    def write_predictions(name):
-        output_file = preds_file(name)
-        with tf.io.gfile.GFile(output_file, 'wt') as f:
-            test_inpf = functools.partial(input_fn, fwords(name))
-            golds_gen = generator_fn(fwords(name))
-            preds_gen = estimator.predict(test_inpf)
-            for golds, preds in zip(golds_gen, preds_gen):
-                ((words, _), tags) = golds
-                preds_tags = [i.decode() for i in preds['tags']]
-                for word, tag, tag_pred in zip(words, tags, preds_tags):
-                    # f.write(b' '.join([word, tag, tag_pred]) + b'\n')
-                    f.write(' '.join([word, tag, tag_pred]) + '\n')
-                # f.write(b'\n')
-                f.write('\n')
-
-    for name in ['train', 'test']:
-        write_predictions(name)
+    # # Write predictions to file
+    # def write_predictions(name):
+    #     output_file = preds_file(name)
+    #     with tf.io.gfile.GFile(output_file, 'w') as f:
+    #         test_inpf = functools.partial(input_fn, fwords(name))
+    #         golds_gen = generator_fn(fwords(name))
+    #         preds_gen = estimator.predict(test_inpf)
+    #         for golds, preds in zip(golds_gen, preds_gen):
+    #             ((words, _), tags) = golds
+    #             preds_tags = [i.decode() for i in preds['tags']]
+    #             for word, tag, tag_pred in zip(words, tags, preds_tags):
+    #                 # f.write(b' '.join([word, tag, tag_pred]) + b'\n')
+    #                 f.write(' '.join([word, tag, tag_pred]) + '\n')
+    #             # f.write(b'\n')
+    #             f.write('\n')
+    #
+    # for name in ['train', 'test']:
+    #     write_predictions(name)
 
     # export saved_model
     feature_spec = {
-        'words': tf.placeholder(tf.string, [None, None]),
+        'words': tf.placeholder(tf.int32, [None, None]),
         'words_len': tf.placeholder(tf.int32, [None]),
     }
 
-    instance_saved_dir = os.path.join(params['saved_model_dir'], model_specific_name)
+    if params.get('forced_saved_model_dir'):
+        instance_saved_dir = params.get('forced_saved_model_dir')
+    else:
+        instance_saved_dir = os.path.join(params['saved_model_dir'], model_specific_name)
 
     utils.create_dir_if_needed(instance_saved_dir)
 
     serving_input_receiver_fn = tf.estimator.export.build_raw_serving_input_receiver_fn(feature_spec)
-    estimator.export_saved_model(
+    final_saved_model = estimator.export_saved_model(
         instance_saved_dir,
         serving_input_receiver_fn,
     )
 
-    return evaluate_result, export_results
+    return evaluate_result, export_results, final_saved_model

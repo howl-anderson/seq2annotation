@@ -26,6 +26,16 @@ class Model(object):
         self.mode = mode
         self.params = params
 
+    def tpu_input_layer(self):
+        word_ids = self.features['words']
+
+        nwords = tf.identity(self.features['words_len'], name='input_words_len')
+
+        indices = self.params['indices']
+        num_tags = self.params['num_tags']
+
+        return indices, num_tags, word_ids, nwords
+
     def input_layer(self):
         data = np.loadtxt(self.params['words'], dtype=np.unicode, encoding=None)
         mapping_strings = tf.Variable(data.reshape((-1,)))
@@ -170,7 +180,8 @@ class Model(object):
         raise NotImplementedError
 
     def __call__(self):
-        indices, num_tags, word_ids, nwords = self.input_layer()
+        # indices, num_tags, word_ids, nwords = self.input_layer()
+        indices, num_tags, word_ids, nwords = self.tpu_input_layer()
 
         embeddings = self.embedding_layer(word_ids)
 
@@ -183,19 +194,18 @@ class Model(object):
                                      dtype=tf.float32)
 
         pred_ids = self.crf_decode_layer(logits, crf_params, nwords)
-
         pred_strings = self.id2tag(pred_ids, name='predict')
 
-        word_strings = self.id2word(word_ids, name='word_strings')
+        # word_strings = self.id2word(word_ids, name='word_strings')
 
         # print(word_strings)
 
-        predictions = {
-            'pred_ids': pred_ids,
-            'tags': pred_strings
-        }
-
         if self.mode == tf.estimator.ModeKeys.PREDICT:
+            predictions = {
+                'pred_ids': pred_ids,
+                'tags': pred_strings
+            }
+
             if self.params['use_tpu']:
                 return tf.contrib.tpu.TPUEstimatorSpec(
                     self.mode, predictions=predictions
@@ -204,7 +214,7 @@ class Model(object):
                 return tf.estimator.EstimatorSpec(self.mode,
                                                   predictions=predictions)
         else:
-            true_tag_ids = self.tag2id(self.labels)
+            true_tag_ids = self.labels
 
             # print(pred_strings)
             # print(self.labels)

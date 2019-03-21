@@ -27,7 +27,7 @@ train_input_func = build_input_func(train_data_generator_func, config['model'])
 eval_input_func = build_input_func(eval_data_generator_func, config['model'])
 
 # ***** test ******
-train_iterator = train_input_func()
+# train_iterator = train_input_func()
 import tensorflow as tf
 import sys
 

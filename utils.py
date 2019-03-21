@@ -46,9 +46,36 @@ def read_assets():
     }
 
 
-def generator_func(data_generator_func):
+def to_fixed_len(parsed_result, fixed_len=None, defaults=None):
+    (words, words_len), tags = parsed_result
+    (defaults_words, defaults_words_len), defaults_tags = defaults
+
+    if len(words) < fixed_len:
+        for _ in range(fixed_len - len(words)):
+            words.append(defaults_words)
+    else:
+        words = words[:fixed_len]
+
+    if words_len > fixed_len:
+        words_len = fixed_len
+
+    if len(tags) < fixed_len:
+        for _ in range(fixed_len - len(tags)):
+            tags.append(defaults_tags)
+    else:
+        tags = tags[:fixed_len]
+
+    return (words, words_len), tags
+
+
+def generator_func(data_generator_func, fixed_len=None, defaults=None):
+    print(fixed_len, defaults)
     for sentence in data_generator_func():
-        yield parse_fn(sentence)
+        parsed_result = parse_fn(sentence)
+        if fixed_len:
+            yield to_fixed_len(parsed_result, fixed_len, defaults)
+        else:
+            yield parsed_result
 
 
 def parse_fn(offset_data):
@@ -65,7 +92,7 @@ def parse_to_dataset(data_generator_func, config=None, shuffle_and_repeat=False)
     defaults = (('<pad>', 0), 'O')
 
     dataset = tf.data.Dataset.from_generator(
-        functools.partial(generator_func, data_generator_func),
+        functools.partial(generator_func, data_generator_func=data_generator_func, fixed_len=12, defaults=(('<pad>', 0), 'O')),
         output_shapes=shapes, output_types=types)
 
     if shuffle_and_repeat:
@@ -80,9 +107,15 @@ def parse_to_dataset(data_generator_func, config=None, shuffle_and_repeat=False)
     # tags_index_table = index_table_from_file(read_assets()['tag_filename'])
     # dataset = dataset.map(lambda x, y: ((words_index_table.lookup(x[0]), x[1]), tags_index_table.lookup(y)))
 
+    # padded_batch don't work with TPU: need static shape
+    # dataset = (dataset
+    #            .padded_batch(config['batch_size'], shapes, defaults,
+    #                          drop_remainder=True)  #  drop_remainder needed by TPU
+    #            .prefetch(1))
+
     dataset = (dataset
-               .padded_batch(config['batch_size'], shapes, defaults,
-                             drop_remainder=True)  #  drop_remainder needed by TPU
+               .batch(config['batch_size'],
+                      drop_remainder=True)  #  drop_remainder needed by TPU
                .prefetch(1))
 
     return dataset
@@ -103,12 +136,16 @@ def dataset_to_feature_column(dataset):
     )
     label = tag_index_lookuper.lookup(label)
 
+    words.set_shape((32, 12))
+    words_len.set_shape((32,))
+    label.set_shape((32, 12))
+
     return {'words': words, 'words_len': words_len}, label
 
 
 def build_input_func(data_generator_func, config=None):
     def input_func(params=None):
-        config.update(params)
+        # config.update(params or {})
         train_dataset = parse_to_dataset(data_generator_func, config, shuffle_and_repeat=True)
         data_iterator = dataset_to_feature_column(train_dataset)
         

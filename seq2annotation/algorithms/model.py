@@ -21,6 +21,13 @@ class Model(object):
         return instance()
 
     def __init__(self, features, labels, mode, params):
+        # with tf.Session() as sess:
+        #     sess.run(tf.tables_initializer())
+        #     result = sess.run((features, labels))
+        #     print(result[0]['words'].shape)
+        #     print(result[0]['words_len'].shape)
+        #     print(result[1].shape)
+
         self.features = features
         self.labels = labels
         self.mode = mode
@@ -100,43 +107,43 @@ class Model(object):
 
         return logits
 
-    def load_tag_data(self):
-        data = np.loadtxt(self.params['tags'], dtype=np.unicode, encoding=None)
-        mapping_strings = tf.Variable(data.reshape((-1,)))
+    # def load_tag_data(self):
+    #     data = np.loadtxt(self.params['tags'], dtype=np.unicode, encoding=None)
+    #     mapping_strings = tf.Variable(data.reshape((-1,)))
+    #
+    #     return mapping_strings
 
-        return mapping_strings
+    # def load_word_data(self):
+    #     data = np.loadtxt(self.params['words'], dtype=np.unicode, encoding=None)
+    #     mapping_strings = tf.Variable(data.reshape((-1,)))
+    #
+    #     return mapping_strings
 
-    def load_word_data(self):
-        data = np.loadtxt(self.params['words'], dtype=np.unicode, encoding=None)
-        mapping_strings = tf.Variable(data.reshape((-1,)))
+    # def tag2id(self, labels, name=None):
+    #     mapping_strings = self.load_tag_data()
+    #     vocab_tags = tf.contrib.lookup.index_table_from_tensor(mapping_strings, name=name)
+    #
+    #     tags = vocab_tags.lookup(labels)
+    #
+    #     return tags
 
-        return mapping_strings
+    # def id2tag(self, pred_ids, name=None):
+    #     mapping_strings = self.load_tag_data()
+    #     reverse_vocab_tags = tf.contrib.lookup.index_to_string_table_from_tensor(
+    #         mapping_strings, name=name)
+    #
+    #     pred_strings = reverse_vocab_tags.lookup(tf.to_int64(pred_ids))
+    #
+    #     return pred_strings
 
-    def tag2id(self, labels, name=None):
-        mapping_strings = self.load_tag_data()
-        vocab_tags = tf.contrib.lookup.index_table_from_tensor(mapping_strings, name=name)
-
-        tags = vocab_tags.lookup(labels)
-
-        return tags
-
-    def id2tag(self, pred_ids, name=None):
-        mapping_strings = self.load_tag_data()
-        reverse_vocab_tags = tf.contrib.lookup.index_to_string_table_from_tensor(
-            mapping_strings, name=name)
-
-        pred_strings = reverse_vocab_tags.lookup(tf.to_int64(pred_ids))
-
-        return pred_strings
-
-    def id2word(self, word_ids, name=None):
-        mapping_strings = self.load_word_data()
-        reverse_vocab_tags = tf.contrib.lookup.index_to_string_table_from_tensor(
-            mapping_strings, name=name)
-
-        word_strings = reverse_vocab_tags.lookup(tf.to_int64(word_ids))
-
-        return word_strings
+    # def id2word(self, word_ids, name=None):
+    #     mapping_strings = self.load_word_data()
+    #     reverse_vocab_tags = tf.contrib.lookup.index_to_string_table_from_tensor(
+    #         mapping_strings, name=name)
+    #
+    #     word_strings = reverse_vocab_tags.lookup(tf.to_int64(word_ids))
+    #
+    #     return word_strings
 
     def loss_layer(self, preds, ground_true, nwords, crf_params):
         with tf.name_scope("CRF_log_likelihood"):
@@ -194,7 +201,7 @@ class Model(object):
                                      dtype=tf.float32)
 
         pred_ids = self.crf_decode_layer(logits, crf_params, nwords)
-        pred_strings = self.id2tag(pred_ids, name='predict')
+        # pred_strings = self.id2tag(pred_ids, name='predict')
 
         # word_strings = self.id2word(word_ids, name='word_strings')
 
@@ -203,7 +210,7 @@ class Model(object):
         if self.mode == tf.estimator.ModeKeys.PREDICT:
             predictions = {
                 'pred_ids': pred_ids,
-                'tags': pred_strings
+                # 'tags': pred_strings
             }
 
             if self.params['use_tpu']:

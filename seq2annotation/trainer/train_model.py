@@ -197,8 +197,12 @@ def train_model(**kwargs):
         run_every_secs=hook_params['run_every_secs']
     )
 
+    from tensorflow.python import debug as tf_debug
+
+    debug_hook = tf_debug.LocalCLIDebugHook(ui_type="readline")
+
     train_spec = tf.estimator.TrainSpec(input_fn=train_inpf, hooks=[hook], max_steps=params['train_spec']['max_steps'])
-    eval_spec = tf.estimator.EvalSpec(input_fn=eval_inpf, throttle_secs=params['eval_spec']['throttle_secs'], hooks=[observer_hook])
+    eval_spec = tf.estimator.EvalSpec(input_fn=eval_inpf, throttle_secs=params['eval_spec']['throttle_secs'], hooks=[])
     evaluate_result, export_results = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
     # estimator.train(input_fn=train_inpf, hooks=[hook])
 

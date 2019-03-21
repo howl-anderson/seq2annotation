@@ -27,30 +27,34 @@ train_input_func = build_input_func(train_data_generator_func, config['model'])
 eval_input_func = build_input_func(eval_data_generator_func, config['model'])
 
 # ***** test ******
-train_iterator = train_input_func()
 import tensorflow as tf
 import sys
 
-# data_generator = generator_func(train_data_generator_func)
+# data_generator = generator_func(train_data_generator_func, fixed_len=20, defaults=(('<pad>', 0), 'O'))
 # for i, data in enumerate(data_generator):
 #     print(i, data)
+#     break
 #
 # sys.exit(0)
 
+# train_iterator = train_input_func()
 # with tf.Session() as sess:
 #     sess.run(tf.tables_initializer())
 #
 #     counter = 0
 #     while True:
 #         try:
-#             value = sess.run(train_iterator[0]['words'])
+#             result = sess.run(train_iterator)
 #             counter += 1
-#             print(value)
+#             print(result)
+#             print(result[0]['words'].shape)
+#             print(result[0]['words_len'].shape)
+#             print(result[1].shape)
 #             break
 #         except tf.errors.OutOfRangeError:
 #             break
-#
-# print(counter)
+# #
+# # print(counter)
 # #
 # sys.exit(0)
 # ***** /test ******

@@ -108,6 +108,7 @@ def dataset_to_feature_column(dataset):
 
 def build_input_func(data_generator_func, config=None):
     def input_func(params=None):
+        config.update(params)
         train_dataset = parse_to_dataset(data_generator_func, config, shuffle_and_repeat=True)
         data_iterator = dataset_to_feature_column(train_dataset)
         

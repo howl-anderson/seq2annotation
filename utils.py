@@ -8,8 +8,8 @@ from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 def read_configure():
     return {
         'corpus': {
-            'train': './data/train.conllz',
-            'test': './data/test.conllz'
+            'train': 'gs://ecarx/data/train.conllz',
+            'test': 'gs://ecarx/data/test.conllz'
         },
         'model': {
             'shuffle_pool_size': 10,
@@ -41,8 +41,8 @@ def index_table_from_file(vocabulary_file=None):
 
 def read_assets():
     return {
-        'vocab_filename': 'data/unicode_char_list.txt',
-        'tag_filename': 'data/tags.txt'
+        'vocab_filename': 'gs://ecarx/data/unicode_char_list.txt',
+        'tag_filename': 'gs://ecarx/data/tags.txt'
     }
 
 

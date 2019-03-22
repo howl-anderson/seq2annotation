@@ -3,11 +3,9 @@ FROM ubuntu:16.04
 LABEL version="0.0.1-beta"
 
 # setup local mirror
-COPY sources.list /tmp/sources.list
-RUN cat /tmp/sources.list > /etc/apt/sources.list
-RUN rm /etc/apt/sources.list
+COPY sources.list  /etc/apt/sources.list
 
-RUN apt-get update && apt-get install -y \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
     python3-pip \
     python-dev \
     build-essential \

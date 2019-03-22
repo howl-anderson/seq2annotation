@@ -1,3 +1,4 @@
+import os
 import sys
 
 from flask import Flask, request, jsonify
@@ -25,16 +26,46 @@ def load_predict_fn(export_dir):
     return server
 
 
+class IndexToStringTable(object):
+    def __init__(self, lookup_file):
+        self.dict = {}
+
+        with open(lookup_file) as fd:
+            for index, string in enumerate(fd):
+                self.dict[index] = string.strip()
+
+    def lookup(self, index):
+        return self.dict[index]
+
+
+class IndexTable(object):
+    def __init__(self, lookup_file):
+        self.dict = {}
+
+        with open(lookup_file) as fd:
+            for index, string in enumerate(fd):
+                string = string.strip()
+                self.dict[string] = index
+
+    def lookup(self, string):
+        return self.dict[string]
+
+
 class Server(object):
     def __init__(self, model_dir):
         self.model_dir = model_dir
         self.predict_fn = predictor.from_saved_model(model_dir)
 
+        self.char_to_index_table = IndexTable(os.path.join(model_dir, 'assets.extra/vocab.txt'))
+        self.index_to_tag_table = IndexToStringTable(os.path.join(model_dir, 'assets.extra/tags.txt'))
+
     def serve(self, input_text, raise_exception=False):
         input_feature = {
-            'words': [[i for i in input_text]],
+            'words': [[i for i in map(self.char_to_index_table.lookup, input_text)]],
             'words_len': [len(input_text)],
         }
+
+        print(input_feature)
 
         predictions = self.predict_fn(input_feature)
         tags = predictions['tags'][0]
@@ -42,6 +73,8 @@ class Server(object):
 
         # decode Unicode
         tags_seq = [i.decode() for i in tags]
+
+        print(tags_seq)
 
         # BILUO to offset
         failed = False

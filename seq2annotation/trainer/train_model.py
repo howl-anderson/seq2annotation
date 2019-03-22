@@ -238,6 +238,10 @@ def train_model(**kwargs):
     final_saved_model = estimator.export_saved_model(
         instance_saved_dir,
         serving_input_receiver_fn,
+        assets_extra={
+            'tags.txt': 'data/tags.txt',
+            'vocab.txt': 'data/unicode_char_list.txt'
+        }
     )
 
     return evaluate_result, export_results, final_saved_model

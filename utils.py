@@ -14,7 +14,7 @@ def read_configure():
         'model': {
             'shuffle_pool_size': 10,
             'batch_size': 32,
-            'epochs': 1,
+            'epochs': 20,
             'arch': {}
          }
     }
@@ -90,17 +90,17 @@ def parse_to_dataset(data_generator_func, config=None, shuffle_and_repeat=False)
 def dataset_to_feature_column(dataset):
     (words, words_len), label = dataset.make_one_shot_iterator().get_next()
 
-    word_index_lookuper = tf.contrib.lookup.index_table_from_file(
-        read_assets()['vocab_filename'],
-        num_oov_buckets=1
-    )
-    words = word_index_lookuper.lookup(words)
-
-    tag_index_lookuper = tf.contrib.lookup.index_table_from_file(
-        read_assets()['tag_filename'],
-        num_oov_buckets=1
-    )
-    label = tag_index_lookuper.lookup(label)
+    # word_index_lookuper = tf.contrib.lookup.index_table_from_file(
+    #     read_assets()['vocab_filename'],
+    #     num_oov_buckets=1
+    # )
+    # words = word_index_lookuper.lookup(words)
+    #
+    # tag_index_lookuper = tf.contrib.lookup.index_table_from_file(
+    #     read_assets()['tag_filename'],
+    #     num_oov_buckets=1
+    # )
+    # label = tag_index_lookuper.lookup(label)
 
     return {'words': words, 'words_len': words_len}, label
 

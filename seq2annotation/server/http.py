@@ -60,8 +60,10 @@ class Server(object):
         self.index_to_tag_table = IndexToStringTable(os.path.join(model_dir, 'assets.extra/tags.txt'))
 
     def serve(self, input_text, raise_exception=False):
+        # input_text = list(map(self.char_to_index_table.lookup, input_text))
+
         input_feature = {
-            'words': [[i for i in map(self.char_to_index_table.lookup, input_text)]],
+            'words': [[i for i in input_text]],
             'words_len': [len(input_text)],
         }
 

@@ -198,7 +198,7 @@ def train_model(**kwargs):
     )
 
     train_spec = tf.estimator.TrainSpec(input_fn=train_inpf, hooks=[hook], max_steps=params['train_spec']['max_steps'])
-    eval_spec = tf.estimator.EvalSpec(input_fn=eval_inpf, throttle_secs=params['eval_spec']['throttle_secs'], hooks=[observer_hook])
+    eval_spec = tf.estimator.EvalSpec(input_fn=eval_inpf, throttle_secs=params['eval_spec']['throttle_secs'], hooks=[])
     evaluate_result, export_results = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
     # estimator.train(input_fn=train_inpf, hooks=[hook])
 
@@ -223,7 +223,8 @@ def train_model(**kwargs):
 
     # export saved_model
     feature_spec = {
-        'words': tf.placeholder(tf.int32, [None, None]),
+        # 'words': tf.placeholder(tf.int32, [None, None]),
+        'words': tf.placeholder(tf.string, [None, None]),
         'words_len': tf.placeholder(tf.int32, [None]),
     }
 

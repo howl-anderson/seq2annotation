@@ -180,8 +180,8 @@ class Model(object):
         raise NotImplementedError
 
     def __call__(self):
-        # indices, num_tags, word_ids, nwords = self.input_layer()
-        indices, num_tags, word_ids, nwords = self.tpu_input_layer()
+        indices, num_tags, word_ids, nwords = self.input_layer()
+        # indices, num_tags, word_ids, nwords = self.tpu_input_layer()
 
         embeddings = self.embedding_layer(word_ids)
 
@@ -214,7 +214,8 @@ class Model(object):
                 return tf.estimator.EstimatorSpec(self.mode,
                                                   predictions=predictions)
         else:
-            true_tag_ids = self.labels
+            # true_tag_ids = self.labels
+            true_tag_ids = self.tag2id(self.labels, 'labels')
 
             # print(pred_strings)
             # print(self.labels)

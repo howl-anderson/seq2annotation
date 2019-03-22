@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 LABEL version="0.0.1-beta"
 
 # for setup local mirror
-RUN apt-get update && apt-get install -y
+RUN apt-get update && apt-get install -y \
     apt-transport-https \
     ca-certificates
 

@@ -36,130 +36,140 @@ observer_hook = TensorObserveHook(
 )
 
 
-def train_model(**kwargs):
-    data_dir = kwargs.pop('data_dir', '.')
-    result_dir = kwargs.pop('result_dir', '.')
-    input_fn = kwargs.pop('input_fn', simple_input_fn)
-    generator_fn = kwargs.pop('generator_fn', simple_generator_fn)
-    model = kwargs.pop('model', None)
-    model_name = kwargs.pop('model_name', None)
-    model_fn = kwargs.pop('model_fn') if kwargs.get('model_fn') else getattr(model, 'model_fn')
+def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
+    # config=kwargs['config']
+    # data_dir = kwargs.pop('data_dir', '.')
+    # result_dir = kwargs.pop('result_dir', '.')
+    # input_fn = kwargs.pop('input_fn', simple_input_fn)
+    # generator_fn = kwargs.pop('generator_fn', simple_generator_fn)
+    # model = kwargs.pop('model', None)
+    # model_name = kwargs.pop('model_name', None)
+    # model_fn = kwargs.pop('model_fn') if kwargs.get('model_fn') else getattr(model, 'model_fn')
 
-    params = {
-        'dim': 300,
-        'dropout': 0.5,
-        'num_oov_buckets': 1,
-        'epochs': None,
-        'batch_size': 20,
-        'buffer': 15000,
-        'lstm_size': 100,
-        'words': utils.join_path(data_dir, './unicode_char_list.txt'),
-        'lookup': utils.join_path(data_dir, './lookup.txt'),
-        'chars': utils.join_path(data_dir, 'vocab.chars.txt'),
-        'tags': utils.join_path(data_dir, './tags.txt'),
-        'glove': utils.join_path(data_dir, './glove.npz'),
-
-        'model_dir': utils.join_path(result_dir, 'model_dir'),
-        'params_log_file': utils.join_path(result_dir, 'params.json'),
-
-        'train': utils.join_path(data_dir, '{}.conllz'.format('train')),
-        'test': utils.join_path(data_dir, '{}.conllz'.format('test')),
-
-        'preds': {
-            'train': utils.join_path(result_dir, '{}.txt'.format('preds_train')),
-            'test': utils.join_path(result_dir, '{}.txt'.format('preds_test')),
-        },
-
-        'optimizer_params': {},
-
-        'saved_model_dir': utils.join_path(result_dir, 'saved_model'),
-
-        'hook': {
-            'stop_if_no_increase': {
-                'min_steps': 100,
-                'run_every_secs': 60,
-                'max_steps_without_increase': 20
-            }
-        },
-
-        'train_spec': {
-            'max_steps': 5000
-        },
-        'eval_spec': {
-            'throttle_secs': 60
-        },
-
-        'estimator': {
-            'save_checkpoints_secs': 120
-        },
+    # model_fn = getattr(model, 'model_fn')
+    # model_name = getattr(model, 'get_model_name')()
 
 
-        'embedding': {
-            'vocabulary_size': 128003
-        },
+    # params = {
+    #     'dim': 300,
+    #     'dropout': 0.5,
+    #     'num_oov_buckets': 1,
+    #     'epochs': None,
+    #     'batch_size': 20,
+    #     'buffer': 15000,
+    #     'lstm_size': 100,
+    #     'words': utils.join_path(data_dir, './unicode_char_list.txt'),
+    #     'lookup': utils.join_path(data_dir, './lookup.txt'),
+    #     'chars': utils.join_path(data_dir, 'vocab.chars.txt'),
+    #     'tags': utils.join_path(data_dir, './tags.txt'),
+    #     'glove': utils.join_path(data_dir, './glove.npz'),
+    #
+    #     'model_dir': utils.join_path(result_dir, 'model_dir'),
+    #     'params_log_file': utils.join_path(result_dir, 'params.json'),
+    #
+    #     'train': utils.join_path(data_dir, '{}.conllz'.format('train')),
+    #     'test': utils.join_path(data_dir, '{}.conllz'.format('test')),
+    #
+    #     'preds': {
+    #         'train': utils.join_path(result_dir, '{}.txt'.format('preds_train')),
+    #         'test': utils.join_path(result_dir, '{}.txt'.format('preds_test')),
+    #     },
+    #
+    #     'optimizer_params': {},
+    #
+    #     'saved_model_dir': utils.join_path(result_dir, 'saved_model'),
+    #
+    #     'hook': {
+    #         'stop_if_no_increase': {
+    #             'min_steps': 100,
+    #             'run_every_secs': 60,
+    #             'max_steps_without_increase': 20
+    #         }
+    #     },
+    #
+    #     'train_spec': {
+    #         'max_steps': 5000
+    #     },
+    #     'eval_spec': {
+    #         'throttle_secs': 60
+    #     },
+    #
+    #     'estimator': {
+    #         'save_checkpoints_secs': 120
+    #     },
+    #
+    #
+    #     'embedding': {
+    #         'vocabulary_size': 128003
+    #     },
+    #
+    #     'use_tpu': False,
+    #     'tpu_config': {
+    #         'tpu_name': None,
+    #         'zone': None,
+    #         'gcp_project': None
+    #     }
+    # }
 
-        'use_tpu': False,
-        'tpu_config': {
-            'tpu_name': None,
-            'zone': None,
-            'gcp_project': None
-        }
-    }
+    # # update from kwargs
+    # params.update(kwargs)
+    #
+    # train_inpf = params.pop('train_inpf')
+    # eval_inpf = params.pop('eval_inpf')
 
-    # update from kwargs
-    params.update(kwargs)
+    # with tf.io.gfile.GFile(config['params_log_file'], 'w') as f:
+    #     json.dump(params, f, indent=4, sort_keys=True)
 
-    train_inpf = params.pop('train_inpf')
-    eval_inpf = params.pop('eval_inpf')
+    # def fwords(name):
+    #     return params[name]
+    #
+    # def preds_file(name):
+    #     return params['preds'][name]
 
-    with tf.io.gfile.GFile(params['params_log_file'], 'w') as f:
-        json.dump(params, f, indent=4, sort_keys=True)
+    # # Estimator, train and evaluate
+    # if not train_inpf:
+    #     train_inpf = functools.partial(input_fn, input_file=fwords('train'),
+    #                                    config=params, shuffle_and_repeat=True)
+    #
+    # if not eval_inpf:
+    #     eval_inpf = functools.partial(input_fn, input_file=fwords('test'))
 
-    def fwords(name):
-        return params[name]
+    estimator_params = copy.deepcopy(config)
 
-    def preds_file(name):
-        return params['preds'][name]
-
-    # Estimator, train and evaluate
-    if not train_inpf:
-        train_inpf = functools.partial(input_fn, input_file=fwords('train'),
-                                       config=params, shuffle_and_repeat=True)
-        
-    if not eval_inpf:
-        eval_inpf = functools.partial(input_fn, input_file=fwords('test'))
-
-    estimator_params = copy.deepcopy(params)
+    # estimator_params = {
+    #     'config': config,
+    #     'depends': {}
+    # }
     # estimator_params.update({
     #     'words_feature_columns': words_feature_columns,
     #     'words_len_feature_columns': words_len_feature_columns
     # })
 
     # get tag info
-    with Path(params['tags']).open() as f:
+    with Path(config['tags']).open() as f:
         indices = [idx for idx, tag in enumerate(f) if tag.strip() != 'O']
         num_tags = len(indices) + 1
 
-        estimator_params['indices'] = indices
-        estimator_params['num_tags'] = num_tags
+        estimator_params['_indices'] = indices
+        estimator_params['_num_tags'] = num_tags
 
-    cfg = tf.estimator.RunConfig(save_checkpoints_secs=params['estimator']['save_checkpoints_secs'])
+    cfg = tf.estimator.RunConfig(save_checkpoints_secs=config['save_checkpoints_secs'])
 
     model_specific_name = '{model_name}-{batch_size}-{learning_rate}-{max_steps}-{max_steps_without_increase}'.format(
-        model_name=model_name if model_name else model.get_model_name(),
-        batch_size=params['batch_size'],
-        learning_rate=params['optimizer_params'].get('learning_rate'),
-        max_steps=params['train_spec'].get('max_steps'),
-        max_steps_without_increase=params['hook'].get('max_steps_without_increase')
+        model_name=model_name,
+        batch_size=config['batch_size'],
+        learning_rate=config['learning_rate'],
+        max_steps=config['max_steps'],
+        max_steps_without_increase=config['max_steps_without_increase']
     )
 
-    instance_model_dir = os.path.join(params['model_dir'], model_specific_name)
+    instance_model_dir = os.path.join(config['model_dir'], model_specific_name)
 
-    if params['use_tpu']:
+    if config['use_tpu']:
         tpu_cluster_resolver = tf.contrib.cluster_resolver.TPUClusterResolver(
-            tpu=params['tpu_config']['tpu_name'],
-            zone=params['tpu_config']['zone'],
-            project=params['tpu_config']['gcp_project']
+            tpu=config['tpu_name'],
+            zone=config['tpu_zone'],
+            project=config['gcp_project']
         )
 
         run_config = tf.contrib.tpu.RunConfig(
@@ -189,16 +199,16 @@ def train_model(**kwargs):
     utils.create_dir_if_needed(estimator.eval_dir())
 
 
-    hook_params = params['hook']['stop_if_no_increase']
-    hook = tf.contrib.estimator.stop_if_no_increase_hook(
-        estimator, 'f1',
-        max_steps_without_increase=hook_params['max_steps_without_increase'],
-        min_steps=hook_params['min_steps'],
-        run_every_secs=hook_params['run_every_secs']
-    )
+    # hook_params = params['hook']['stop_if_no_increase']
+    # hook = tf.contrib.estimator.stop_if_no_increase_hook(
+    #     estimator, 'f1',
+    #     max_steps_without_increase=hook_params['max_steps_without_increase'],
+    #     min_steps=hook_params['min_steps'],
+    #     run_every_secs=hook_params['run_every_secs']
+    # )
 
-    train_spec = tf.estimator.TrainSpec(input_fn=train_inpf, hooks=[hook], max_steps=params['train_spec']['max_steps'])
-    eval_spec = tf.estimator.EvalSpec(input_fn=eval_inpf, throttle_secs=params['eval_spec']['throttle_secs'], hooks=[])
+    train_spec = tf.estimator.TrainSpec(input_fn=train_inpf, hooks=config['train_hook'], max_steps=config['max_steps'])
+    eval_spec = tf.estimator.EvalSpec(input_fn=eval_inpf, throttle_secs=config['throttle_secs'], hooks=config['eval_hook'])
     evaluate_result, export_results = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
     # estimator.train(input_fn=train_inpf, hooks=[hook])
 
@@ -228,10 +238,10 @@ def train_model(**kwargs):
         'words_len': tf.placeholder(tf.int32, [None]),
     }
 
-    if params.get('forced_saved_model_dir'):
-        instance_saved_dir = params.get('forced_saved_model_dir')
+    if config.get('forced_saved_model_dir'):
+        instance_saved_dir = config.get('forced_saved_model_dir')
     else:
-        instance_saved_dir = os.path.join(params['saved_model_dir'], model_specific_name)
+        instance_saved_dir = os.path.join(config['saved_model_dir'], model_specific_name)
 
     utils.create_dir_if_needed(instance_saved_dir)
 
@@ -239,10 +249,10 @@ def train_model(**kwargs):
     final_saved_model = estimator.export_saved_model(
         instance_saved_dir,
         serving_input_receiver_fn,
-        assets_extra={
-            'tags.txt': 'data/tags.txt',
-            'vocab.txt': 'data/unicode_char_list.txt'
-        }
+        # assets_extra={
+        #     'tags.txt': 'data/tags.txt',
+        #     'vocab.txt': 'data/unicode_char_list.txt'
+        # }
     )
 
     return evaluate_result, export_results, final_saved_model

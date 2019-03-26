@@ -56,8 +56,8 @@ class Server(object):
         self.model_dir = model_dir
         self.predict_fn = predictor.from_saved_model(model_dir)
 
-        self.char_to_index_table = IndexTable(os.path.join(model_dir, 'assets.extra/vocab.txt'))
-        self.index_to_tag_table = IndexToStringTable(os.path.join(model_dir, 'assets.extra/tags.txt'))
+        # self.char_to_index_table = IndexTable(os.path.join(model_dir, 'assets.extra/vocab.txt'))
+        # self.index_to_tag_table = IndexToStringTable(os.path.join(model_dir, 'assets.extra/tags.txt'))
 
     def serve(self, input_text, raise_exception=False):
         # input_text = list(map(self.char_to_index_table.lookup, input_text))

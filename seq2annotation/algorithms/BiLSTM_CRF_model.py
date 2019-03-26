@@ -5,8 +5,11 @@ from seq2annotation.algorithms.model import Model
 class BilstmCrfModel(Model):
     def bilstm_layer(self, embeddings, nwords):
         t = tf.transpose(embeddings, perm=[1, 0, 2])
-        lstm_cell_fw = tf.contrib.rnn.LSTMBlockFusedCell(self.params['lstm_size'])
-        lstm_cell_bw = tf.contrib.rnn.LSTMBlockFusedCell(self.params['lstm_size'])
+
+        lstm_size = self.params['lstm_size']
+
+        lstm_cell_fw = tf.contrib.rnn.LSTMBlockFusedCell(lstm_size)
+        lstm_cell_bw = tf.contrib.rnn.LSTMBlockFusedCell(lstm_size)
         lstm_cell_bw = tf.contrib.rnn.TimeReversedFusedRNN(lstm_cell_bw)
         output_fw, _ = lstm_cell_fw(t, dtype=tf.float32,
                                     sequence_length=nwords)

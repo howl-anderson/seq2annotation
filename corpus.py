@@ -20,7 +20,7 @@ class Corpus(object):
     TRAIN = 'train'
 
     def __init__(self, config):
-        self.config = config['corpus']
+        self.config = config
         self.dataset_mapping = {}
 
     def prepare(self):

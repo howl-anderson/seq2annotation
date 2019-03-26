@@ -6,7 +6,11 @@ from performance_metrics import PerformanceMetrics
 from utils import read_configure, build_input_func, build_gold_generator_func, generator_func
 from model import Model
 
-config = read_configure()
+raw_config = read_configure()
+model = Model(raw_config)
+
+config = model.get_default_config()
+config.update(raw_config)
 
 task_status = TaskStatus(config)
 
@@ -17,19 +21,19 @@ train_data_generator_func = corpus.get_generator_func(corpus.TRAIN)
 eval_data_generator_func = corpus.get_generator_func(corpus.EVAL)
 
 # build model according configure
-model = Model(config['model']['arch'])
+
 
 # send START status to monitor system
 task_status.send_status(task_status.START)
 
 # train and evaluate model
-train_input_func = build_input_func(train_data_generator_func, config['model'])
-eval_input_func = build_input_func(eval_data_generator_func, config['model'])
+train_input_func = build_input_func(train_data_generator_func, config)
+eval_input_func = build_input_func(eval_data_generator_func, config)
 
 # ***** test ******
-train_iterator = train_input_func()
-import tensorflow as tf
-import sys
+# train_iterator = train_input_func()
+# import tensorflow as tf
+# import sys
 
 # data_generator = generator_func(train_data_generator_func)
 # for i, data in enumerate(data_generator):
@@ -58,7 +62,7 @@ import sys
 evaluate_result, export_results, final_saved_model = model.train_and_eval_then_save(
     train_input_func,
     eval_input_func,
-    './results/saved_model'
+    config
 )
 
 task_status.send_status(task_status.DONE)

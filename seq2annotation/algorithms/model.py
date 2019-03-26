@@ -31,16 +31,16 @@ class Model(object):
 
         nwords = tf.identity(self.features['words_len'], name='input_words_len')
 
-        indices = self.params['indices']
-        num_tags = self.params['num_tags']
+        indices = self.params['_indices']
+        num_tags = self.params['_num_tags']
 
         return indices, num_tags, word_ids, nwords
 
     def input_layer(self):
-        data = np.loadtxt(self.params['words'], dtype=np.unicode, encoding=None)
+        data = np.loadtxt(self.params['vocab'], dtype=np.unicode, encoding=None)
         mapping_strings = tf.Variable(data.reshape((-1,)))
         vocab_words = tf.contrib.lookup.index_table_from_tensor(
-            mapping_strings, num_oov_buckets=self.params['num_oov_buckets'])
+            mapping_strings, num_oov_buckets=1)
 
         # Word Embeddings
         words = tf.identity(self.features['words'], name='input_words')
@@ -79,10 +79,10 @@ class Model(object):
         # glove = np.load(params['glove'])['embeddings']  # np.array
 
         # training the embedding during training
-        glove = np.zeros((self.params['embedding']['vocabulary_size'], self.params['dim']), dtype=np.float32)
+        glove = np.zeros((self.params['embedding_vocabulary_size'], self.params['embedding_dim']), dtype=np.float32)
 
         # Add OOV word embedding
-        embedding_array = np.vstack([glove, [[0.] * self.params['dim']]])
+        embedding_array = np.vstack([glove, [[0.] * self.params['embedding_dim']]])
 
         embedding_variable = tf.Variable(embedding_array, dtype=tf.float32, trainable=True)
         embeddings = tf.nn.embedding_lookup(embedding_variable, word_ids)

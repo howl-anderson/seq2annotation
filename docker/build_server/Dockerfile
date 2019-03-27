@@ -24,6 +24,7 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple git+https://github.com/guillaumegenthial/tf_metrics.git
 RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple tokenizer_tools
 RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple pandas
+RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple git+https://github.com/howl-anderson/ioflow.git
 RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple git+https://github.com/howl-anderson/seq2annotation.git
 RUN mkdir /model
 

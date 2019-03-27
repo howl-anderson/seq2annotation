@@ -26,3 +26,6 @@ RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple tokenizer_tools
 RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple pandas
 RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple git+https://github.com/howl-anderson/ioflow.git
 RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple git+https://github.com/howl-anderson/seq2annotation.git
+
+# bugfix
+COPY function_utils.py /usr/local/lib/python3.6/dist-packages/tensorflow/python/util/function_utils.py

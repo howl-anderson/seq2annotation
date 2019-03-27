@@ -4,8 +4,8 @@ from ioflow.model_saver import ModelSaver
 from ioflow.performance_metrics import PerformanceMetrics
 from ioflow.configure import read_configure
 
-from utils import build_input_func
-from model import Model
+from seq2annotation.input import build_input_func
+from seq2annotation.model import Model
 
 raw_config = read_configure()
 model = Model(raw_config)

@@ -1,9 +1,10 @@
-from corpus import Corpus
-from task_status import TaskStatus
-from model_saver import ModelSaver
-from performance_metrics import PerformanceMetrics
+from ioflow.corpus import Corpus
+from ioflow.task_status import TaskStatus
+from ioflow.model_saver import ModelSaver
+from ioflow.performance_metrics import PerformanceMetrics
+from ioflow.configure import read_configure
 
-from utils import read_configure, build_input_func, build_gold_generator_func, generator_func
+from utils import build_input_func
 from model import Model
 
 raw_config = read_configure()

@@ -5,4 +5,4 @@ git+https://github.com/guillaumegenthial/tf_metrics.git
 flask
 flask-cors
 pandas
-invoke
+git+https://github.com/howl-anderson/ioflow.git

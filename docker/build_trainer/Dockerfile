@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ner_base:0.0.1
 
 LABEL version="0.0.1-beta"
 

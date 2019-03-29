@@ -37,7 +37,8 @@ class Model(object):
         return indices, num_tags, word_ids, nwords
 
     def input_layer(self):
-        data = np.loadtxt(self.params['vocab'], dtype=np.unicode, encoding=None)
+        # data = np.loadtxt(self.params['vocab'], dtype=np.unicode, encoding=None)
+        data = self.params['vocab_data']
         mapping_strings = tf.Variable(data.reshape((-1,)))
         vocab_words = tf.contrib.lookup.index_table_from_tensor(
             mapping_strings, num_oov_buckets=1)
@@ -101,7 +102,8 @@ class Model(object):
         return logits
 
     def load_tag_data(self):
-        data = np.loadtxt(self.params['tags'], dtype=np.unicode, encoding=None)
+        # data = np.loadtxt(self.params['tags'], dtype=np.unicode, encoding=None)
+        data = self.params['tags_data']
         mapping_strings = tf.Variable(data.reshape((-1,)))
 
         return mapping_strings

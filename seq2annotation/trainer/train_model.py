@@ -146,12 +146,17 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
     # })
 
     # get tag info
-    with Path(config['tags']).open() as f:
-        indices = [idx for idx, tag in enumerate(f) if tag.strip() != 'O']
-        num_tags = len(indices) + 1
+    # with Path(config['tags']).open() as f:
+    #     indices = [idx for idx, tag in enumerate(f) if tag.strip() != 'O']
+    #     num_tags = len(indices) + 1
+    #
+    #     estimator_params['_indices'] = indices
+    #     estimator_params['_num_tags'] = num_tags
 
-        estimator_params['_indices'] = indices
-        estimator_params['_num_tags'] = num_tags
+    indices = [idx for idx, tag in enumerate(config['tags_data'].tolist()) if tag.strip() != 'O']
+    num_tags = len(indices) + 1
+    estimator_params['_indices'] = indices
+    estimator_params['_num_tags'] = num_tags
 
     cfg = tf.estimator.RunConfig(save_checkpoints_secs=config['save_checkpoints_secs'])
 

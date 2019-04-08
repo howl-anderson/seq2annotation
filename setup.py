@@ -1,9 +1,11 @@
+import setuptools
 from setuptools import setup
 
 setup(
     name='seq2annotation',
     version='0.1.2',
-    packages=['seq2annotation', 'seq2annotation.algorithms', 'seq2annotation.data_input', 'seq2annotation.server', 'seq2annotation.trainer'],
+    packages=setuptools.find_packages(),
+    include_package_data=True,
     url='',
     license='MIT',
     author='Xiaoquan Kong',

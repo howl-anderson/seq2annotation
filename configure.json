@@ -4,7 +4,7 @@
   "train": "./data/train.conllz",
   "test": "./data/empty.conllz",
   "tags": "data/tags.txt",
-  "shuffle_pool_size": 10,
+  "shuffle_pool_size": 1000,
   "batch_size": 32,
   "epochs": 80,
   "max_steps": null,

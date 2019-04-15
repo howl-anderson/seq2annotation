@@ -2,6 +2,7 @@ import functools
 
 import tensorflow as tf
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
+from tokenizer_tools.tagset.NER.BILUO import BILUOEncoderDecoder
 
 
 def index_table_from_file(vocabulary_file=None):
@@ -39,6 +40,9 @@ def parse_fn(offset_data):
     tags = offset_to_biluo(offset_data)
     words = offset_data.text
     assert len(words) == len(tags), "Words and tags lengths don't match"
+
+    # print((words, len(words)), tags)
+
     return (words, len(words)), tags
 
 
@@ -53,7 +57,7 @@ def parse_to_dataset(data_generator_func, config=None, shuffle_and_repeat=False)
         output_shapes=shapes, output_types=types)
 
     if shuffle_and_repeat:
-        print(">>> {}".format(config))
+        # print(">>> {}".format(config))
         dataset = dataset.shuffle(config['shuffle_pool_size']).repeat(config['epochs'])
 
     # char_encoder = tfds.features.text.SubwordTextEncoder.load_from_file(read_assets()['vocab_filename'])
@@ -101,3 +105,13 @@ def build_input_func(data_generator_func, config=None):
 
 def build_gold_generator_func(offset_dataset):
     return functools.partial(generator_func, offset_dataset)
+
+
+def generate_tagset(tags):
+    tagset = set()
+    for tag in tags:
+        encoder = BILUOEncoderDecoder(tag)
+        tagset.update(encoder.all_tag_set())
+
+    return list(tagset)
+

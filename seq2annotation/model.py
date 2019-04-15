@@ -1,3 +1,7 @@
+import pkg_resources
+
+import numpy as np
+
 from seq2annotation.trainer.train_model import train_model
 from seq2annotation.algorithms.BiLSTM_CRF_model import BilstmCrfModel
 
@@ -84,8 +88,22 @@ class Model(object):
                 'tpu_name': None,
                 'zone': None,
                 'gcp_project': None
-            }
+            },
+
+            'save_checkpoints_secs': 60,
+            'learning_rate': 0.001,
+            'max_steps': None,
+            'max_steps_without_increase': 1000,
+            'train_hook': {},
+            'shuffle_pool_size': 30,
+            'embedding_dim': 64,
         }
+
+        vocab_data_file = pkg_resources.resource_filename(__name__,
+                                                          './data/unicode_char_list.txt')
+        params['vocab_data'] = np.loadtxt(vocab_data_file, dtype=np.unicode,
+                                          encoding=None).tolist()
+        params['embedding_vocabulary_size'] = len(params['vocab_data'])
 
         params.update(BilstmCrfModel.default_params())
 

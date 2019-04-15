@@ -1,13 +1,10 @@
-import pkg_resources
-
-import numpy as np
 from ioflow.corpus import Corpus
 from ioflow.task_status import TaskStatus
 from ioflow.model_saver import ModelSaver
 from ioflow.performance_metrics import PerformanceMetrics
 from ioflow.configure import read_configure
 
-from seq2annotation.input import build_input_func
+from seq2annotation.input import build_input_func, generate_tagset
 from seq2annotation.model import Model
 
 raw_config = read_configure()
@@ -27,10 +24,10 @@ eval_data_generator_func = corpus.get_generator_func(corpus.EVAL)
 corpus_meta_data = corpus.get_meta_info()
 
 # config['vocab_data'] = corpus_meta_data['vocab']
-vocab_data_file = pkg_resources.resource_filename(__name__, '../data/unicode_char_list.txt')
-config['vocab_data'] = np.loadtxt(vocab_data_file, dtype=np.unicode, encoding=None)
+# vocab_data_file = pkg_resources.resource_filename(__name__, '../data/unicode_char_list.txt')
+# config['vocab_data'] = np.loadtxt(vocab_data_file, dtype=np.unicode, encoding=None)
 
-config['tags_data'] = corpus_meta_data['tags']
+config['tags_data'] = generate_tagset(corpus_meta_data['tags'])
 
 # build model according configure
 

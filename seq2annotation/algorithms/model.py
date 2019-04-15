@@ -39,7 +39,7 @@ class Model(object):
     def input_layer(self):
         # data = np.loadtxt(self.params['vocab'], dtype=np.unicode, encoding=None)
         data = self.params['vocab_data']
-        mapping_strings = tf.Variable(data.reshape((-1,)))
+        mapping_strings = tf.Variable(data)
         vocab_words = tf.contrib.lookup.index_table_from_tensor(
             mapping_strings, num_oov_buckets=1)
 
@@ -63,9 +63,9 @@ class Model(object):
         nwords = tf.identity(self.features['words_len'], name='input_words_len')
 
         # get tag info
-        with Path(self.params['tags']).open() as f:
-            indices = [idx for idx, tag in enumerate(f) if tag.strip() != 'O']
-            num_tags = len(indices) + 1
+        # with Path(self.params['tags']).open() as f:
+        indices = [idx for idx, tag in enumerate(self.params['tags_data']) if tag.strip() != 'O']
+        num_tags = len(indices) + 1
 
         # # true tags to ids
         # if self.mode == tf.estimator.ModeKeys.PREDICT:
@@ -104,7 +104,7 @@ class Model(object):
     def load_tag_data(self):
         # data = np.loadtxt(self.params['tags'], dtype=np.unicode, encoding=None)
         data = self.params['tags_data']
-        mapping_strings = tf.Variable(data.reshape((-1,)))
+        mapping_strings = tf.Variable(data)
 
         return mapping_strings
 

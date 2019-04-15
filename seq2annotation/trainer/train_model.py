@@ -153,7 +153,7 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
     #     estimator_params['_indices'] = indices
     #     estimator_params['_num_tags'] = num_tags
 
-    indices = [idx for idx, tag in enumerate(config['tags_data'].tolist()) if tag.strip() != 'O']
+    indices = [idx for idx, tag in enumerate(config['tags_data']) if tag.strip() != 'O']
     num_tags = len(indices) + 1
     estimator_params['_indices'] = indices
     estimator_params['_num_tags'] = num_tags
@@ -212,12 +212,15 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
     #     run_every_secs=hook_params['run_every_secs']
     # )
 
-    train_spec = tf.estimator.TrainSpec(input_fn=train_inpf, hooks=config['train_hook'], max_steps=config['max_steps'])
-    eval_spec = tf.estimator.EvalSpec(input_fn=eval_inpf, throttle_secs=config['throttle_secs'], hooks=config['eval_hook'])
-    evaluate_result, export_results = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
-    # estimator.train(input_fn=train_inpf, hooks=[hook])
+    if eval_inpf:
+        train_spec = tf.estimator.TrainSpec(input_fn=train_inpf, hooks=config['train_hook'], max_steps=config['max_steps'])
+        eval_spec = tf.estimator.EvalSpec(input_fn=eval_inpf, throttle_secs=config['throttle_secs'], hooks=config['eval_hook'])
+        evaluate_result, export_results = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
+    else:
+        estimator.train(input_fn=train_inpf, hooks=config['train_hook'], max_steps=config['max_steps'])
+        evaluate_result, export_results = {}, None
 
-    # # Write predictions to file
+        # # Write predictions to file
     # def write_predictions(name):
     #     output_file = preds_file(name)
     #     with tf.io.gfile.GFile(output_file, 'w') as f:
@@ -251,7 +254,7 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
     utils.create_dir_if_needed(instance_saved_dir)
 
     serving_input_receiver_fn = tf.estimator.export.build_raw_serving_input_receiver_fn(feature_spec)
-    final_saved_model = estimator.export_saved_model(
+    raw_final_saved_model = estimator.export_saved_model(
         instance_saved_dir,
         serving_input_receiver_fn,
         # assets_extra={
@@ -259,5 +262,7 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
         #     'vocab.txt': 'data/unicode_char_list.txt'
         # }
     )
+
+    final_saved_model = raw_final_saved_model.decode('utf-8')
 
     return evaluate_result, export_results, final_saved_model

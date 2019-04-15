@@ -1,4 +1,10 @@
 ## HTTP server
+### run service
+```bash
+python -m seq2annotation.server.http /path/to/saved_model
+```
+
+默认启动在 主机： `localhost` 端口：`5000`
 ### input format
 example:
 in HTTP format

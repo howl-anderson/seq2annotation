@@ -15,3 +15,6 @@
 * https://www.cnblogs.com/Determined22/p/7238342.html
 * http://www.davidsbatista.net/blog/2018/05/09/Named_Entity_Evaluation/
 * http://www.voidcn.com/article/p-kvrmknrl-bgh.html
+
+## Credits
+- 深受 [Guillaume Genthial](https://github.com/guillaumegenthial) 的 [tf_ner](https://github.com/guillaumegenthial/tf_ner) 项目的影响

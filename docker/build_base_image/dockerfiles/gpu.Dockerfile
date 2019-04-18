@@ -2,6 +2,8 @@ FROM tensorflow/tensorflow:1.13.1-gpu-py3
 
 LABEL version="0.0.1-beta"
 
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+
 # for setup local mirror
 RUN apt-get update && apt-get install -y \
     apt-transport-https \

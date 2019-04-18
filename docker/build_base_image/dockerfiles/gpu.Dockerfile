@@ -11,11 +11,7 @@ RUN apt-get update && apt-get install -y \
 # setup local mirror
 COPY sources.list  /etc/apt/sources.list
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
-    python3-pip \
-    python-dev \
-    build-essential \
-    git
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y git
 
 RUN apt-get install -y locales
 RUN locale-gen en_US.UTF-8

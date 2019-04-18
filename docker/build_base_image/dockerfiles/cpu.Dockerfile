@@ -2,6 +2,8 @@ FROM tensorflow/tensorflow:1.13.1-py3
 
 LABEL version="0.0.1-beta"
 
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+
 # for setup local mirror
 RUN apt-get update && apt-get install -y \
     apt-transport-https \
@@ -11,13 +13,9 @@ RUN apt-get update && apt-get install -y \
 # setup local mirror
 COPY sources.list  /etc/apt/sources.list
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
-    python3-pip \
-    python-dev \
-    build-essential \
-    git
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y git
 
-RUN apt-get install -y locales
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y locales
 RUN locale-gen en_US.UTF-8
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 

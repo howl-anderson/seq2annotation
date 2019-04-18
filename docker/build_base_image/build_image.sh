@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
-docker build --force-rm --tag ner_base:0.0.1 .
+arch=${1:-cpu}
+version=${2:-0.0.1}
+
+docker build --force-rm -f ./dockerfiles/${arch}.Dockerfile --tag ner_base-${arch}:${version} .

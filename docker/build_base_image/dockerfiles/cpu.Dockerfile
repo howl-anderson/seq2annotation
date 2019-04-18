@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM tensorflow/tensorflow:1.13.1-py3
 
 LABEL version="0.0.1-beta"
 

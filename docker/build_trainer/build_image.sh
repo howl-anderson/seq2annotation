@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
-docker build --force-rm --tag ner_trainer:0.0.1 .
+base_image=${1:-ner_base-cpu}
+tag=${2:-0.0.1}
+
+docker build --force-rm --build-arg BASE_IMAGE_NAME=${base_image} BASE_IMAGE_TAG=${tag} --tag ner_trainer:0.0.1 .

@@ -27,7 +27,7 @@ corpus_meta_data = corpus.get_meta_info()
 # vocab_data_file = pkg_resources.resource_filename(__name__, '../data/unicode_char_list.txt')
 # config['vocab_data'] = np.loadtxt(vocab_data_file, dtype=np.unicode, encoding=None)
 
-config['tags_data'] = generate_tagset(corpus_meta_data['tags'])
+config['tags_data'] = generate_tagset(corpus_meta_data['tags'], True)
 
 # build model according configure
 

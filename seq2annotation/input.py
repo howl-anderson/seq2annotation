@@ -107,11 +107,11 @@ def build_gold_generator_func(offset_dataset):
     return functools.partial(generator_func, offset_dataset)
 
 
-def generate_tagset(tags):
+def generate_tagset(tags, include_oscar=False):
     tagset = set()
     for tag in tags:
         encoder = BILUOEncoderDecoder(tag)
         tagset.update(encoder.all_tag_set())
 
-    return list(tagset)
+    return list(tagset) + ['O'] if include_oscar else []
 

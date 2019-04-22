@@ -118,7 +118,7 @@ def generate_tagset(tags):
     # make sure O is first tag,
     # this is a bug feature, otherwise sentence_correct is not correct
     # due to the crf decoder, need fix
-    tagset_list.pop(BILUOEncoderDecoder.oscar)
+    tagset_list.remove(BILUOEncoderDecoder.oscar)
     tagset_list.insert(0, BILUOEncoderDecoder.oscar)
 
     return tagset_list

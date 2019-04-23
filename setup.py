@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='seq2annotation',
-    version='0.1.2',
+    version='0.2.0',
     packages=setuptools.find_packages(),
     include_package_data=True,
     url='',

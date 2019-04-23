@@ -1,3 +1,3 @@
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 from seq2annotation.trainer.train_model import train_model

@@ -11,6 +11,7 @@ from seq2annotation.data_input.simple import input_fn as simple_input_fn
 # from seq2annotation.data_input.with_lookup import input_fn as simple_input_fn
 from seq2annotation.data_input.simple import generator_fn as simple_generator_fn
 from seq2annotation.algorithms.BiLSTM_CRF_model import BilstmCrfModel
+from seq2annotation.utils import class_from_module_path
 from tokenizer_tools.hooks import TensorObserveHook
 
 
@@ -204,12 +205,23 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
     #     run_every_secs=hook_params['run_every_secs']
     # )
 
+    # build hooks from config
+    train_hook = []
+    for i in config['train_hook']:
+        class_ = class_from_module_path(i['class'])
+        train_hook.append(class_(**i['params']))
+
+    eval_hook = []
+    for i in config['eval_hook']:
+        class_ = class_from_module_path(i['class'])
+        eval_hook.append(class_(**i['params']))
+
     if eval_inpf:
-        train_spec = tf.estimator.TrainSpec(input_fn=train_inpf, hooks=config['train_hook'], max_steps=config['max_steps'])
-        eval_spec = tf.estimator.EvalSpec(input_fn=eval_inpf, throttle_secs=config['throttle_secs'], hooks=config['eval_hook'])
+        train_spec = tf.estimator.TrainSpec(input_fn=train_inpf, hooks=train_hook, max_steps=config['max_steps'])
+        eval_spec = tf.estimator.EvalSpec(input_fn=eval_inpf, throttle_secs=config['throttle_secs'], hooks=eval_hook)
         evaluate_result, export_results = tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
     else:
-        estimator.train(input_fn=train_inpf, hooks=config['train_hook'], max_steps=config['max_steps'])
+        estimator.train(input_fn=train_inpf, hooks=train_hook, max_steps=config['max_steps'])
         evaluate_result, export_results = {}, None
 
         # # Write predictions to file

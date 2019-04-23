@@ -207,12 +207,12 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
 
     # build hooks from config
     train_hook = []
-    for i in config['train_hook']:
+    for i in config.get('train_hook', []):
         class_ = class_from_module_path(i['class'])
         train_hook.append(class_(**i['params']))
 
     eval_hook = []
-    for i in config['eval_hook']:
+    for i in config.get('eval_hook', []):
         class_ = class_from_module_path(i['class'])
         eval_hook.append(class_(**i['params']))
 

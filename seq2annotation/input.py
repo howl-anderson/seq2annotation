@@ -1,6 +1,8 @@
 import functools
 
 import tensorflow as tf
+
+from seq2annotation.utils import class_from_module_path, load_hook
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 from tokenizer_tools.tagset.NER.BILUO import BILUOEncoderDecoder
 
@@ -31,9 +33,19 @@ def read_assets():
     }
 
 
-def generator_func(data_generator_func):
+def generator_func(data_generator_func, config):
+    # load plugin
+    preprocess_hook = load_hook(config.get('preprocess_hook', []))
+
     for sentence in data_generator_func():
-        yield parse_fn(sentence)
+        for hook in preprocess_hook:
+            sentence = hook(sentence)
+
+        if isinstance(sentence, list):
+            for s in sentence:
+                yield parse_fn(s)
+        else:
+            yield parse_fn(sentence)
 
 
 def parse_fn(offset_data):
@@ -53,7 +65,7 @@ def parse_to_dataset(data_generator_func, config=None, shuffle_and_repeat=False)
     defaults = (('<pad>', 0), 'O')
 
     dataset = tf.data.Dataset.from_generator(
-        functools.partial(generator_func, data_generator_func),
+        functools.partial(generator_func, data_generator_func, config),
         output_shapes=shapes, output_types=types)
 
     if shuffle_and_repeat:

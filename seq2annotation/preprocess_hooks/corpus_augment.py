@@ -27,13 +27,13 @@ class CorpusAugment(HookBase):
 
         for i in self.punctuation:
             new_sentence = copy.deepcopy(sentence)
-            new_sentence.text = ''.join((no_tail_text, i))
+            new_sentence.text = [i for i in ''.join((no_tail_text, i))]
 
             result.append(new_sentence)
 
         # add no punctuation one
         new_sentence = copy.deepcopy(sentence)
-        new_sentence.text = no_tail_text
+        new_sentence.text = [i for i in no_tail_text]
         result.append(new_sentence)
 
         return result

@@ -18,7 +18,10 @@ class CorpusAugment(HookBase):
     def __call__(self, sentence):
         text = sentence.text
 
-        no_tail_text = text.rstrip(''.join(self.punctuation))
+        # text can be a list of str
+        text_str = ''.join(text)
+
+        no_tail_text = text_str.rstrip(''.join(self.punctuation))
 
         result = []
 

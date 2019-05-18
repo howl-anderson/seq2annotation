@@ -2,16 +2,14 @@ import os
 import pathlib
 from typing import Text, Any, Type
 
-import tensorflow as tf
-
 
 def create_dir_if_needed(directory):
     # copied from https://stackoverflow.com/questions/273192/how-can-i-safely-create-a-nested-directory-in-python
 
     # if not os.path.exists(directory):
-    if not tf.io.gfile.exists(directory):
+    if not os.path.exists(directory):
         # os.makedirs(directory)
-        tf.io.gfile.makedirs(directory)
+        os.makedirs(directory)
 
 
 def join_path(a, b):

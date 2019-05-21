@@ -9,5 +9,5 @@ RUN mkdir /data
 WORKDIR /data
 
 # adjust to ucloud
-ENV _DEFAULT_CONFIG_FILE=/data/data/configure.json
+ENV _DEFAULT_CONFIG_FILE=/data/configure.json
 CMD ["python3", "-m", "seq2annotation.trainer.cli"]

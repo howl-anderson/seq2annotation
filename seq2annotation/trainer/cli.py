@@ -37,7 +37,7 @@ task_status.send_status(task_status.START)
 
 # train and evaluate model
 train_input_func = build_input_func(train_data_generator_func, config)
-eval_input_func = build_input_func(eval_data_generator_func, config)
+eval_input_func = build_input_func(eval_data_generator_func, config) if eval_data_generator_func else None
 
 # ***** test ******
 # train_iterator = train_input_func()

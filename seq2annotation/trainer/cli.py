@@ -41,22 +41,20 @@ eval_input_func = build_input_func(eval_data_generator_func, config) if eval_dat
 
 # ***** test ******
 # train_iterator = train_input_func()
-# import tensorflow as tf
+import tensorflow as tf
 # import sys
 
-# data_generator = generator_func(train_data_generator_func)
-# for i, data in enumerate(data_generator):
+# for i, data in enumerate(train_data_generator_func()):
 #     print(i, data)
 #
-# sys.exit(0)
-
+#
 # with tf.Session() as sess:
 #     sess.run(tf.tables_initializer())
 #
 #     counter = 0
 #     while True:
 #         try:
-#             value = sess.run(train_iterator[0]['words'])
+#             value = sess.run(train_iterator)
 #             counter += 1
 #             print(value)
 #             break

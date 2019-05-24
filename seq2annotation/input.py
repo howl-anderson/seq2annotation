@@ -53,7 +53,7 @@ def parse_fn(offset_data):
     words = offset_data.text
     assert len(words) == len(tags), "Words and tags lengths don't match"
 
-    # print((words, len(words)), tags)
+    print((words, len(words)), tags)
 
     return (words, len(words)), tags
 

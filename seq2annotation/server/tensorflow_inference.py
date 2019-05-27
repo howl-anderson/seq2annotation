@@ -35,7 +35,7 @@ class Inference(object):
 
         input_feature = {
             'words': [[i for i in text] for text in sentence],
-            'words_len': [len(text) for text in sentence],
+            'words_len': [len(text) for text in raw_sequences],
         }
 
         print(input_feature)

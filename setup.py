@@ -11,5 +11,5 @@ setup(
     author='Xiaoquan Kong',
     author_email='u1mail2me@gmail.com',
     description='seq2annotation',
-    install_requires=['numpy', 'tensorflow', 'tokenizer_tools', 'flask', 'flask-cors']
+    install_requires=['numpy', 'tensorflow', 'keras', 'tokenizer_tools', 'flask', 'flask-cors']
 )

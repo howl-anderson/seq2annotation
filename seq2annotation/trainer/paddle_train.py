@@ -1,7 +1,7 @@
 from ioflow.corpus import Corpus
 from ioflow.task_status import get_task_status_class
 from ioflow.model_saver import ModelSaver
-from ioflow.performance_metrics import PerformanceMetrics
+from ioflow.performance_metrics import get_performance_metrics_class
 from ioflow.configure import read_configure
 
 from seq2annotation.input_paddle import build_input_func, generate_tagset
@@ -52,7 +52,8 @@ class Train(object):
         task_status.send_status(task_status.DONE)
 
         if evaluate_result:
-            performance_metrics = PerformanceMetrics(config)
+            performance_metrics_class = get_performance_metrics_class(config)
+            performance_metrics = performance_metrics_class(config)
             performance_metrics.set_metrics('test_loss',
                                             evaluate_result['loss'])
             performance_metrics.set_metrics('test_acc', evaluate_result['acc'])

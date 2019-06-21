@@ -1,5 +1,5 @@
 from ioflow.corpus import Corpus
-from ioflow.task_status import TaskStatus
+from ioflow.task_status import get_task_status_class
 from ioflow.model_saver import ModelSaver
 from ioflow.performance_metrics import PerformanceMetrics
 from ioflow.configure import read_configure
@@ -21,7 +21,8 @@ class Train(object):
         config = model.get_default_config()
         config.update(raw_config)
 
-        task_status = TaskStatus(config)
+        task_status_class = get_task_status_class(config)
+        task_status = task_status_class(config)
 
         # read data according configure
         corpus = Corpus(config)

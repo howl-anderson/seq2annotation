@@ -1,17 +1,6 @@
 import setuptools
 from setuptools import setup
 
-from setuptools.command.install import install
-from subprocess import getoutput
-
-
-class PostInstall(install):
-    pkg = 'git+https://github.com/guillaumegenthial/tf_metrics.git'
-
-    def run(self):
-        install.run(self)
-        print(getoutput('pip install ' + self.pkg))
-
 
 setup(
     name='seq2annotation',
@@ -23,6 +12,5 @@ setup(
     author='Xiaoquan Kong',
     author_email='u1mail2me@gmail.com',
     description='seq2annotation',
-    install_requires=['numpy', 'tensorflow', 'keras', 'tokenizer_tools', 'flask', 'flask-cors'],
-    cmdclass={'install': PostInstall}
+    install_requires=['numpy', 'tensorflow', 'keras', 'tokenizer_tools', 'flask', 'flask-cors']
 )

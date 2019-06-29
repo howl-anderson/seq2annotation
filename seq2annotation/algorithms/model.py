@@ -2,7 +2,7 @@ from pathlib import Path
 
 import tensorflow as tf
 import numpy as np
-from tf_metrics import precision, recall, f1
+from seq2annotation.metrics import precision, recall, f1
 from tokenizer_tools.metrics import correct_rate
 
 

@@ -15,7 +15,7 @@ class PostInstall(install):
 
 setup(
     name='seq2annotation',
-    version='0.3.3',
+    version='0.3.4',
     packages=setuptools.find_packages(),
     include_package_data=True,
     url='',

@@ -209,12 +209,18 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
     train_hook = []
     for i in config.get('train_hook', []):
         class_ = class_from_module_path(i['class'])
-        train_hook.append(class_(**i['params']))
+        params = i['params']
+        if i.get('inject_whole_config', False):
+            params['config'] = config
+        train_hook.append(class_(**params))
 
     eval_hook = []
     for i in config.get('eval_hook', []):
         class_ = class_from_module_path(i['class'])
-        eval_hook.append(class_(**i['params']))
+        params = i['params']
+        if i.get('inject_whole_config', False):
+            params['config'] = config
+        eval_hook.append(class_(**params))
 
     if eval_inpf:
         train_spec = tf.estimator.TrainSpec(input_fn=train_inpf, hooks=train_hook, max_steps=config['max_steps'])

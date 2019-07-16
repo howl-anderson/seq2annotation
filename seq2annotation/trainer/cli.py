@@ -1,11 +1,15 @@
-from ioflow.corpus import Corpus
-from ioflow.task_status import TaskStatus
-from ioflow.model_saver import ModelSaver
-from ioflow.performance_metrics import PerformanceMetrics
+from ioflow.corpus import get_corpus_processor
+from ioflow.performance_reporter import get_performance_reporter
+from ioflow.task_status import get_task_status
+from ioflow.model_saver import get_model_saver
 from ioflow.configure import read_configure
 
 from seq2annotation.input import build_input_func, generate_tagset
 from seq2annotation.model import Model
+from seq2annotation.health_check_transponder import run_health_check_transponder_in_background
+
+# start health check
+run_health_check_transponder_in_background()
 
 raw_config = read_configure()
 model = Model(raw_config)
@@ -13,10 +17,10 @@ model = Model(raw_config)
 config = model.get_default_config()
 config.update(raw_config)
 
-task_status = TaskStatus(config)
+task_status = get_task_status(config)
 
 # read data according configure
-corpus = Corpus(config)
+corpus = get_corpus_processor(config)
 corpus.prepare()
 train_data_generator_func = corpus.get_generator_func(corpus.TRAIN)
 eval_data_generator_func = corpus.get_generator_func(corpus.EVAL)
@@ -75,9 +79,9 @@ evaluate_result, export_results, final_saved_model = model.train_and_eval_then_s
 task_status.send_status(task_status.DONE)
 
 if evaluate_result:
-    performance_metrics = PerformanceMetrics(config)
-    performance_metrics.set_metrics('test_loss', evaluate_result['loss'])
-    performance_metrics.set_metrics('test_acc', evaluate_result['acc'])
+    performance_metrics = get_performance_reporter(config)
+    performance_metrics.log_performance('test_loss', evaluate_result['loss'])
+    performance_metrics.log_performance('test_acc', evaluate_result['acc'])
 
-model_saver = ModelSaver(config)
+model_saver = get_model_saver(config)
 model_saver.save_model(final_saved_model)

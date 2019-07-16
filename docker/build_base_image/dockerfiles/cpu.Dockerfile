@@ -27,3 +27,5 @@ RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple git+https://github.
 
 # bugfix
 COPY function_utils.py /usr/local/lib/python3.5/dist-packages/tensorflow/python/util/function_utils.py
+
+HEALTHCHECK --interval=5s --timeout=3s CMD curl --fail http://localhost:8091/ping || exit 1

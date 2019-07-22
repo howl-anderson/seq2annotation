@@ -1,6 +1,7 @@
 import functools
 import time
 from threading import Thread
+import os
 
 from flask import Flask
 
@@ -29,9 +30,13 @@ def http_transponder(port):
     app.run(port=port)
 
 
+# try get port config from environment
+http_port = os.getenv('HEALTH_CHECK_TRANSPONDER_PORT', 9998)
+
+
 run_health_check_transponder_in_background = functools.partial(
     run_function_in_background,
-    functools.partial(http_transponder, port=8091)
+    functools.partial(http_transponder, port=http_port)
 )
 
 

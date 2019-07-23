@@ -236,6 +236,16 @@ class Model(object):
                         self.mode, loss=loss, eval_metrics=(my_metric_fn, [true_tag_ids, pred_ids, num_tags, indices, nwords])
                     )
                 else:
+                    # set up metrics reporter
+                    # from ioflow.hooks.metrics_reporter import metrics_report_hook
+                    # hook_class = metrics_report_hook(self.params)
+                    # hook_metrics = {"eval_loss": loss}
+                    # hook_metrics.update({'_'.join(['eval', k]): v[0] for k, v in metrics.items()})
+                    # hook = hook_class(hook_metrics)
+
+                    # return tf.estimator.EstimatorSpec(
+                    #     self.mode, loss=loss, eval_metric_ops=metrics, evaluation_hooks=[hook])
+
                     return tf.estimator.EstimatorSpec(
                         self.mode, loss=loss, eval_metric_ops=metrics)
 
@@ -250,5 +260,13 @@ class Model(object):
                         self.mode, loss=loss, train_op=train_op
                     )
                 else:
+                    # set up metrics reporter
+                    # from ioflow.hooks.metrics_reporter import metrics_report_hook
+                    # hook_class = metrics_report_hook(self.params)
+                    # hook = hook_class({"train_loss": loss})
+                    
+                    # return tf.estimator.EstimatorSpec(
+                    #     self.mode, loss=loss, train_op=train_op, training_hooks=[hook])
+
                     return tf.estimator.EstimatorSpec(
                         self.mode, loss=loss, train_op=train_op)

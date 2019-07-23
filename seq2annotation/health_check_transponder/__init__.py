@@ -27,7 +27,7 @@ def http_transponder(port):
     def are_you_ok():
         return "I'm OK"
 
-    app.run(port=port)
+    app.run(host='0.0.0.0', port=port)
 
 
 # try get port config from environment

@@ -94,13 +94,15 @@ task_status.send_progress(100)
 task_status.send_status(task_status.START_TEST)
 
 from seq2annotation.server.tensorflow_inference import Inference
+from seq2annotation.server.http import sequence_to_response
+
 eval_reporter = get_eval_reporter(config)
 
 # result_list = []
 inference = Inference(final_saved_model)
 for item in eval_data_generator_func():
-    result = inference.infer(item.text)
-    eval_reporter.record_x_and_y(item, json.dumps(result))
+    text, result, _, _ = inference.infer(''.join(item.text))
+    eval_reporter.record_x_and_y(item, sequence_to_response(text, result))
     # result_list.append(result)
 
 eval_reporter.submit()

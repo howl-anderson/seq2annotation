@@ -20,6 +20,17 @@ def load_predict_fn(export_dir):
     return server
 
 
+def sequence_to_response(text, seq):
+    response = {
+        'text': text,
+        'spans': [{'start': i.start, 'end': i.end, 'type': i.entity}
+                  for i in seq.span_set],
+        'ents': list({i.entity.lower() for i in seq.span_set})
+    }
+
+    return response
+
+
 @app.route("/parse", methods=['GET'])
 def single_tokenizer():
     text_msg = request.args.get('q')
@@ -31,12 +42,7 @@ def single_tokenizer():
     print(tags)
     # print(seq)
 
-    response = {
-        'text': raw_input_text,
-        'spans': [{'start': i.start, 'end': i.end, 'type': i.entity} for i in
-                  seq.span_set],
-        'ents': list({i.entity.lower() for i in seq.span_set})
-    }
+    response = sequence_to_response(raw_input_text, seq)
 
     return jsonify(response)
 
@@ -52,12 +58,7 @@ def batch_infer():
     response = []
     for raw_input_text, seq, tags, failed in infer_results:
         response.append(
-            {
-                'text': raw_input_text,
-                'spans': [{'start': i.start, 'end': i.end, 'type': i.entity}
-                          for i in seq.span_set],
-                'ents': list({i.entity.lower() for i in seq.span_set})
-            }
+            sequence_to_response(raw_input_text, seq)
         )
 
     return jsonify(response)

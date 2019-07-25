@@ -1,0 +1,16 @@
+{
+  "train_hook": [
+    {
+      "class": "ioflow.hooks.local_task_manager.LocalTaskManagerHook",
+      "params": {}
+    }
+  ],
+  "eval_hook": [],
+  "estimator": {
+    "training_hooks": [
+    ],
+    "evaluation_hooks": [
+    ],
+    "prediction_hooks": []
+  }
+}

@@ -2,11 +2,11 @@
   "use_tpu": false,
   "data_source_scheme": "local",
   "train": "./data/train.conllx",
-  "test": "./data/empty.conllx",
+  "test": "./data/test.conllx",
   "tags": "data/entity.txt",
   "shuffle_pool_size": 1000,
   "batch_size": 512,
-  "epochs": 2,
+  "epochs": 1,
   "max_steps": null,
   "max_steps_without_increase": 15000,
   "embedding_vocabulary_size": 128003,
@@ -17,11 +17,10 @@
   "params_log_file": "./results/params.json",
   "model_dir": "./results/model_dir",
   "saved_model_dir": "./results/saved_model",
-  "save_checkpoints_secs": 120,
+  "save_checkpoints_secs": 60,
   "throttle_secs": 60,
   "tpu_name": "",
   "tpu_zone": "",
   "gcp_project": "",
-  "train_hook": [],
-  "eval_hook": []
+  "task_id": "ABC123"
 }

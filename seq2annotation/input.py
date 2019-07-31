@@ -1,10 +1,13 @@
 import functools
+import logging
 
 import tensorflow as tf
 
 from seq2annotation.utils import class_from_module_path, load_hook
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 from tokenizer_tools.tagset.NER.BILUO import BILUOEncoderDecoder
+
+logger = logging.getLogger(__name__)
 
 
 def index_table_from_file(vocabulary_file=None):
@@ -53,7 +56,7 @@ def parse_fn(offset_data):
     words = offset_data.text
     assert len(words) == len(tags), "Words and tags lengths don't match"
 
-    print((words, len(words)), tags)
+    logger.debug((words, len(words)), tags)
 
     return (words, len(words)), tags
 

@@ -10,21 +10,30 @@ from tokenizer_tools.tagset.NER.BILUO import BILUOEncoderDecoder
 logger = logging.getLogger(__name__)
 
 
+class Lookuper(object):
+    def __init__(self, index_table):
+        self.index_table = index_table
+
+    def lookup(self, string):
+        if string not in self.index_table:
+            return 1
+            raise ValueError("'{}' not in index_table".format(string))
+        else:
+            return self.index_table.get(string)
+
+
+    def size(self):
+        return len(self.index_table)
+
+
 def index_table_from_file(vocabulary_file=None):
     index_table = {}
-    index_counter = 0
+    index_counter = 1
     with open(vocabulary_file) as fd:
         for line in fd:
-            key = line.strip()
+            key = line.strip('\n')
             index_table[key] = index_counter
             index_counter += 1
-
-    class Lookuper(object):
-        def __init__(self, index_table):
-            self.index_table = index_table
-
-        def lookup(self, string):
-            return self.index_table.get(string)
 
     return Lookuper(index_table)
 

@@ -1,20 +1,87 @@
-from seq2annotation.trainer.train_model import train_model
-from seq2annotation.algorithms.BiLSTM_CRF_model import BilstmCrfModel
-from seq2annotation.algorithms.IDCNN_CRF_model import IdcnnCrfModel
+import tensorflow as tf
+from tensorflow.python.keras.layers import Embedding, Bidirectional, LSTM
+from tensorflow.python.keras.models import Sequential
+
+from ioflow.configure import read_configure
+from ioflow.corpus import get_corpus_processor
+from seq2annotation.input import generate_tagset, Lookuper, \
+    index_table_from_file
+from tf_crf_layer.layer import CRF
+from tf_crf_layer.loss import crf_loss
+from tf_crf_layer.metrics import crf_accuracy
+from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
+
+config = read_configure()
+
+corpus = get_corpus_processor(config)
+corpus.prepare()
+train_data_generator_func = corpus.get_generator_func(corpus.TRAIN)
+eval_data_generator_func = corpus.get_generator_func(corpus.EVAL)
+
+corpus_meta_data = corpus.get_meta_info()
+
+tags_data = generate_tagset(corpus_meta_data['tags'])
+
+train_data = list(train_data_generator_func())
+eval_data = list(eval_data_generator_func())
+
+tag_lookuper = Lookuper({v: i + 1 for i, v in enumerate(tags_data)})
+vocab_data_file = 'seq2annotation/data/unicode_char_list.txt'
+vocabulary_lookuper = index_table_from_file(vocab_data_file)
 
 
-# train_model(data_dir='./data', result_dir='./result', model_fn=IdcnnCrfModel.model_fn, **IdcnnCrfModel.default_params())
-result = train_model(
-    data_dir='./data', result_dir='./results',
-    train_spec={'max_steps': 150000},
-    hook={
-        'stop_if_no_increase': {
-            'min_steps': 100,
-            'run_every_secs': 60,
-            'max_steps_without_increase': 10000
-        }
-    },
-    model=BilstmCrfModel, **BilstmCrfModel.default_params()
-)
+def preprocss(data):
+    raw_x = []
+    raw_y = []
 
-print(result)
+    for offset_data in data:
+        tags = offset_to_biluo(offset_data)
+        words = offset_data.text
+
+        tag_ids = [tag_lookuper.lookup(i) for i in tags]
+        word_ids = [vocabulary_lookuper.lookup(i) for i in words]
+
+        raw_x.append(word_ids)
+        raw_y.append(tag_ids)
+
+    maxlen = max(len(s) for s in raw_x)
+
+    x = tf.keras.preprocessing.sequence.pad_sequences(raw_x, maxlen,
+                                                      padding='post')  # right padding
+
+    # lef padded with -1. Indeed, any integer works as it will be masked
+    # y_pos = pad_sequences(y_pos, maxlen, value=-1)
+    # y_chunk = pad_sequences(y_chunk, maxlen, value=-1)
+    y = tf.keras.preprocessing.sequence.pad_sequences(raw_y, maxlen, value=0,
+                                                      padding='post')
+
+    return x, y
+
+
+train_x, train_y = preprocss(train_data)
+test_x, test_y = preprocss(eval_data)
+
+EPOCHS = 10
+EMBED_DIM = 64
+BiRNN_UNITS = 200
+
+vacab_size = vocabulary_lookuper.size()
+tag_size = tag_lookuper.size()
+
+model = Sequential()
+model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))  # Random embedding
+# model.add(Embedding(len(vocab), EMBED_DIM, mask_zero=True, input_length=78))  # Random embedding
+model.add(Bidirectional(LSTM(BiRNN_UNITS // 2, return_sequences=True)))
+model.add(CRF(tag_size))
+model.summary()
+
+# model.compile('adam', loss=crf_loss, metrics=[CategoricalAccuracy()])
+model.compile('adam', loss=crf_loss, metrics=[crf_accuracy])
+# model.fit(train_x, train_y, epochs=EPOCHS)
+model.fit(train_x, train_y, epochs=EPOCHS, validation_data=[test_x, test_y])
+
+# test_y_pred = model.predict(test_x)[test_x > 0]
+# test_y_true = test_y[test_x > 0]
+#
+# print('\n---- Result of BiLSTM-CRF ----\n')
+# classification_report(test_y_true, test_y_pred, class_labels)

@@ -1,3 +1,6 @@
+from collections import Counter
+
+import numpy
 import tensorflow as tf
 from tensorflow.python.keras.layers import Embedding, Bidirectional, LSTM
 from tensorflow.python.keras.models import Sequential
@@ -25,9 +28,43 @@ tags_data = generate_tagset(corpus_meta_data['tags'])
 train_data = list(train_data_generator_func())
 eval_data = list(eval_data_generator_func())
 
-tag_lookuper = Lookuper({v: i + 1 for i, v in enumerate(tags_data)})
+tag_lookuper = Lookuper({v: i for i, v in enumerate(tags_data)})
 vocab_data_file = 'seq2annotation/data/unicode_char_list.txt'
 vocabulary_lookuper = index_table_from_file(vocab_data_file)
+
+
+def classification_report(y_true, y_pred, labels):
+    """
+    Similar to the one in sklearn.metrics,
+    reports per classs recall, precision and F1 score
+    """
+    y_true = numpy.asarray(y_true).ravel()
+    y_pred = numpy.asarray(y_pred).ravel()
+    corrects = Counter(yt for yt, yp in zip(y_true, y_pred) if yt == yp)
+    y_true_counts = Counter(y_true)
+    y_pred_counts = Counter(y_pred)
+    report = ((lab,  # label
+               corrects[i] / max(1, y_true_counts[i]),  # recall
+               corrects[i] / max(1, y_pred_counts[i]),  # precision
+               y_true_counts[i]  # support
+               ) for i, lab in enumerate(labels))
+    report = [(l, r, p, 2 * r * p / max(1e-9, r + p), s) for l, r, p, s in report]
+
+    print('{:<15}{:>10}{:>10}{:>10}{:>10}\n'.format('',
+                                                    'recall',
+                                                    'precision',
+                                                    'f1-score',
+                                                    'support'))
+    formatter = '{:<15}{:>10.2f}{:>10.2f}{:>10.2f}{:>10d}'.format
+    for r in report:
+        print(formatter(*r))
+    print('')
+    report2 = list(zip(*[(r * s, p * s, f1 * s) for l, r, p, f1, s in report]))
+    N = len(y_true)
+    print(formatter('avg / total',
+                    sum(report2[0]) / N,
+                    sum(report2[1]) / N,
+                    sum(report2[2]) / N, N) + '\n')
 
 
 def preprocss(data):
@@ -61,7 +98,7 @@ def preprocss(data):
 train_x, train_y = preprocss(train_data)
 test_x, test_y = preprocss(eval_data)
 
-EPOCHS = 10
+EPOCHS = 1
 EMBED_DIM = 64
 BiRNN_UNITS = 200
 
@@ -80,8 +117,8 @@ model.compile('adam', loss=crf_loss, metrics=[crf_accuracy])
 # model.fit(train_x, train_y, epochs=EPOCHS)
 model.fit(train_x, train_y, epochs=EPOCHS, validation_data=[test_x, test_y])
 
-# test_y_pred = model.predict(test_x)[test_x > 0]
-# test_y_true = test_y[test_x > 0]
-#
-# print('\n---- Result of BiLSTM-CRF ----\n')
-# classification_report(test_y_true, test_y_pred, class_labels)
+test_y_pred = model.predict(test_x)[test_x > 0]
+test_y_true = test_y[test_x > 0]
+
+print('\n---- Result of BiLSTM-CRF ----\n')
+classification_report(test_y_true, test_y_pred, tags_data)

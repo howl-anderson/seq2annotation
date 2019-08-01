@@ -12,7 +12,10 @@ logger = logging.getLogger(__name__)
 
 class Lookuper(object):
     def __init__(self, index_table):
+        # index_table: str -> int
         self.index_table = index_table
+        # inverse index table: int -> str
+        self.inverse_index_table = {v: k for k, v in self.index_table.items()}
 
     def lookup(self, string):
         if string not in self.index_table:

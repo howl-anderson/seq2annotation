@@ -13,6 +13,7 @@ from tf_crf_layer.layer import CRF
 from tf_crf_layer.loss import crf_loss
 from tf_crf_layer.metrics import crf_accuracy
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
+from tf_crf_layer.crf_helper import allowed_transitions, constraint_type
 
 config = read_configure()
 
@@ -94,6 +95,7 @@ def preprocss(data):
 
     return x, y
 
+transition_contrain = allowed_transitions(constraint_type.BIOUL, tag_lookuper.inverse_index_table)
 
 train_x, train_y = preprocss(train_data)
 test_x, test_y = preprocss(eval_data)
@@ -110,6 +112,7 @@ model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))  # Random embedding
 # model.add(Embedding(len(vocab), EMBED_DIM, mask_zero=True, input_length=78))  # Random embedding
 model.add(Bidirectional(LSTM(BiRNN_UNITS // 2, return_sequences=True)))
 model.add(CRF(tag_size))
+# model.add(CRF(tag_size, transition_constraint=transition_contrain))
 model.summary()
 
 # model.compile('adam', loss=crf_loss, metrics=[CategoricalAccuracy()])

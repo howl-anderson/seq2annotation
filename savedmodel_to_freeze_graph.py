@@ -14,6 +14,6 @@ with tf.Session(graph=tf.Graph()) as sess:
 
     output_node_name, _ = output_tensor_name.split(":")
 
-    constant_graph = graph_util.convert_variables_to_constants(sess, sess.graph_def, [output_node_name])
+    constant_graph = graph_util.convert_variables_to_constants(sess, sess.graph_def, [output_node_name, 'init_all_tables'])
     with tf.gfile.GFile('./model.pb', mode='wb') as f:
         f.write(constant_graph.SerializeToString())

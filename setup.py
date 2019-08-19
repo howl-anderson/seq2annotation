@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='seq2annotation',
-    version='0.5.0',
+    version='0.5.1',
     packages=setuptools.find_packages(),
     include_package_data=True,
     url='https://github.com/howl-anderson/seq2annotation',

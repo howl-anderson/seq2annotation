@@ -102,6 +102,7 @@ class Model(object):
         vocab_data_file = pkg_resources.resource_filename(__name__,
                                                           './data/unicode_char_list.txt')
         params['vocab_data'] = np.loadtxt(vocab_data_file, dtype=np.unicode,
+                                          comments=None,
                                           encoding=None).tolist()
         params['embedding_vocabulary_size'] = len(params['vocab_data'])
 

@@ -1,3 +1,4 @@
+import os
 from collections import Counter
 
 import numpy
@@ -113,14 +114,19 @@ model.add(CRF(tag_size))
 # print model summary
 model.summary()
 
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['model_dir'])
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
+    load_weights_on_restart=True,
+    verbose=1
+)
 
 model.compile('adam', loss=crf_loss, metrics=[crf_accuracy])
 model.fit(
     train_x, train_y,
     epochs=EPOCHS,
     validation_data=[test_x, test_y],
-    callbacks=[tensorboard_callback]
+    callbacks=[tensorboard_callback, checkpoint_callback]
 )
 
 tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])

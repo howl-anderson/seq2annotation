@@ -17,6 +17,7 @@
   "params_log_file": "./results/params.json",
   "model_dir": "./results/model_dir",
   "saved_model_dir": "./results/saved_model",
+  "summary_log_dir": "./results/summary_log_dir",
   "save_checkpoints_secs": 60,
   "throttle_secs": 60,
   "tpu_name": "",

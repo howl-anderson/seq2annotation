@@ -84,6 +84,9 @@ def build_gold_generator_func(offset_dataset):
 
 
 def generate_tagset(tags):
+    if not tags:
+        return []
+
     tagset = set()
     for tag in tags:
         encoder = BILUOEncoderDecoder(tag)

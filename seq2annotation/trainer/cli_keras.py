@@ -30,7 +30,8 @@ train_data = list(train_data_generator_func())
 eval_data = list(eval_data_generator_func())
 
 tag_lookuper = Lookuper({v: i for i, v in enumerate(tags_data)})
-vocab_data_file = '../../PycharmProjects/seq2annotation/seq2annotation/data/unicode_char_list.txt'
+
+vocab_data_file = os.path.join(os.path.dirname(__file__), '../data/unicode_char_list.txt')
 vocabulary_lookuper = index_table_from_file(vocab_data_file)
 
 

@@ -1,5 +1,6 @@
 import functools
 import logging
+from typing import Dict, List
 
 import tensorflow as tf
 
@@ -11,11 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 class Lookuper(object):
-    def __init__(self, index_table):
+    def __init__(self, index_table: Dict[str, int]):
         # index_table: str -> int
         self.index_table = index_table
         # inverse index table: int -> str
-        self.inverse_index_table = {v: k for k, v in self.index_table.items()}
+        self.inverse_index_table = {v: k for k, v in self.index_table.items()}  # type: Dict[int, str]
 
     def lookup(self, string):
         if string not in self.index_table:
@@ -24,9 +25,19 @@ class Lookuper(object):
         else:
             return self.index_table.get(string)
 
-
-    def size(self):
+    def size(self) -> int:
         return len(self.index_table)
+
+    def check_id_continuity(self) -> bool:
+        for i in range(self.size()):
+            if i not in self.inverse_index_table:
+                return False
+        return True
+
+    def tolist(self) -> List[int]:
+        assert self.check_id_continuity()
+
+        return [self.inverse_index_table[i] for i in range(self.size())]
 
 
 def index_table_from_file(vocabulary_file=None):

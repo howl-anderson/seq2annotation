@@ -1,10 +1,13 @@
+import json
 import os
 from collections import Counter
 
 import numpy
 import tensorflow as tf
+from tensorflow.python.keras import models
 from tensorflow.python.keras.layers import Embedding, Bidirectional, LSTM
 from tensorflow.python.keras.models import Sequential
+from tensorflow.python.keras import layers
 
 from ioflow.configure import read_configure
 from ioflow.corpus import get_corpus_processor
@@ -69,19 +72,28 @@ def classification_report(y_true, y_pred, labels):
                     sum(report2[2]) / N, N) + '\n')
 
 
-def preprocss(data):
+def preprocss(data, intent_lookup_table=None):
     raw_x = []
     raw_y = []
+    raw_intent = []
 
     for offset_data in data:
         tags = offset_to_biluo(offset_data)
         words = offset_data.text
+        label = offset_data.label
 
         tag_ids = [tag_lookuper.lookup(i) for i in tags]
         word_ids = [vocabulary_lookuper.lookup(i) for i in words]
 
         raw_x.append(word_ids)
         raw_y.append(tag_ids)
+        raw_intent.append(label)
+
+    if not intent_lookup_table:
+        raw_intent_set = list(set(raw_intent))
+        intent_lookup_table = Lookuper({v: i for i, v in enumerate(raw_intent_set)})
+
+    intent_int_list = [intent_lookup_table.lookup(i) for i in raw_intent]
 
     maxlen = max(len(s) for s in raw_x)
 
@@ -94,11 +106,21 @@ def preprocss(data):
     y = tf.keras.preprocessing.sequence.pad_sequences(raw_y, maxlen, value=0,
                                                       padding='post')
 
-    return x, y
+    return x, numpy.array(intent_int_list), y, intent_lookup_table
 
 
-train_x, train_y = preprocss(train_data)
-test_x, test_y = preprocss(eval_data)
+train_x, train_intent, train_y, intent_lookup_table = preprocss(train_data)
+test_x, test_intent, test_y, _ = preprocss(eval_data, intent_lookup_table)
+
+from tf_crf_layer.crf_dynamic_constraint_helper import generate_constraint_table, filter_constraint
+
+with open('/home/howl/PycharmProjects/seq2annotation/data/constraint.json') as fd:
+    constraint = json.load(fd)
+
+# filter out entity not in tag_list
+valid_constraint = filter_constraint(constraint, tag_lookuper.index_table.keys(), intent_lookup_table.index_table.keys())
+
+constraint_table = generate_constraint_table(list(valid_constraint.values()), tag_lookuper.inverse_index_table)
 
 EPOCHS = 10
 EMBED_DIM = 64
@@ -107,27 +129,48 @@ BiRNN_UNITS = 200
 vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
 
-model = Sequential()
-model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
-model.add(Bidirectional(LSTM(BiRNN_UNITS // 2, return_sequences=True)))
-model.add(CRF(tag_size))
+# model = Sequential()
+# model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
+# model.add(Bidirectional(LSTM(BiRNN_UNITS // 2, return_sequences=True)))
+# model.add(CRF(tag_size))
+
+
+raw_input = layers.Input(shape=(25,))
+embedding_layer = Embedding(vacab_size, EMBED_DIM, mask_zero=True)(raw_input)
+bilstm_layer = Bidirectional(LSTM(BiRNN_UNITS // 2, return_sequences=True))(embedding_layer)
+
+crf_layer = CRF(
+    units=tag_size,
+    transition_constraint_matrix=constraint_table
+)
+
+dynamic_constraint_input = layers.Input(shape=(1,))
+
+output_layer = crf_layer([bilstm_layer, dynamic_constraint_input])
+
+model = models.Model([raw_input, dynamic_constraint_input], output_layer)
 
 # print model summary
 model.summary()
 
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
-checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-    os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
-    load_weights_on_restart=True,
-    verbose=1
-)
+callbacks_list = []
+
+# tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
+# callbacks_list.append(tensorboard_callback)
+#
+# checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+#     os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
+#     load_weights_on_restart=True,
+#     verbose=1
+# )
+# callbacks_list.append(checkpoint_callback)
 
 model.compile('adam', loss=crf_loss, metrics=[crf_accuracy])
 model.fit(
-    train_x, train_y,
+    [train_x, train_intent], train_y,
     epochs=EPOCHS,
-    validation_data=[test_x, test_y],
-    callbacks=[tensorboard_callback, checkpoint_callback]
+    validation_data=[[test_x, test_intent], test_y],
+    callbacks=callbacks_list
 )
 
 tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])

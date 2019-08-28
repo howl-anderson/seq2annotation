@@ -115,19 +115,24 @@ model.add(CRF(tag_size))
 # print model summary
 model.summary()
 
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
-checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-    os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
-    load_weights_on_restart=True,
-    verbose=1
-)
+callbacks_list = []
+
+# tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
+# callbacks_list.append(tensorboard_callback)
+#
+# checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+#     os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
+#     load_weights_on_restart=True,
+#     verbose=1
+# )
+# callbacks_list.append(checkpoint_callback)
 
 model.compile('adam', loss=crf_loss, metrics=[crf_accuracy])
 model.fit(
     train_x, train_y,
     epochs=EPOCHS,
     validation_data=[test_x, test_y],
-    callbacks=[tensorboard_callback, checkpoint_callback]
+    callbacks=callbacks_list
 )
 
 tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])

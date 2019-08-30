@@ -15,6 +15,8 @@ from tf_crf_layer.loss import crf_loss
 from tf_crf_layer.metrics import crf_accuracy
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 
+from seq2annotation import unrandom
+
 config = read_configure()
 
 corpus = get_corpus_processor(config)
@@ -135,4 +137,4 @@ model.fit(
     callbacks=callbacks_list
 )
 
-tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])
+# tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])

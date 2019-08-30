@@ -34,7 +34,7 @@ class Lookuper(object):
                 return False
         return True
 
-    def tolist(self) -> List[int]:
+    def tolist(self) -> List[str]:
         assert self.check_id_continuity()
 
         return [self.inverse_index_table[i] for i in range(self.size())]

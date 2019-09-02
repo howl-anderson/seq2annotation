@@ -85,7 +85,7 @@ def preprocss(data, maxlen=None, intent_lookup_table=None):
     for offset_data in data:
         tags = offset_to_biluo(offset_data)
         words = offset_data.text
-        label = offset_data.extra_attr['domain']
+        label = offset_data.extra_attr[config['intent_field']] if config['intent_field'] not in ["label"] else getattr(offset_data, config['intent_field'])
 
         tag_ids = [tag_lookuper.lookup(i) for i in tags]
         word_ids = [vocabulary_lookuper.lookup(i) for i in words]
@@ -126,7 +126,7 @@ intent_number = train_intent.shape[1]
 
 from tf_crf_layer.crf_dynamic_constraint_helper import generate_constraint_table, filter_constraint, sort_constraint
 
-constraint_file = os.path.join(os.path.dirname(__file__), '../data/constraint.json')
+constraint_file = config.get("constraint")
 with open(constraint_file) as fd:
     constraint = json.load(fd)
 
@@ -141,7 +141,42 @@ right_constraint_mapping = sort_constraint(valid_constraint, intent_lookup_table
 
 tag_dict = tag_lookuper.inverse_index_table
 
+expected_constraint_table = np.array([
+    [
+    #  Only allowed: Y entity for Y-domain
+        #     O     B-X    B-Y    I-X    I-Y   L-X    L-Y    U-X    U-Y   start   end
+        [     1,     0,     1,     0,     0,    0,     0,     0,     1,    0,     0],  # O
+        [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # B-X
+        [     0,     0,     0,     0,     1,    0,     1,     0,     0,    0,     0],  # B-Y
+        [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # I-X
+        [     0,     0,     0,     0,     1,    0,     1,     0,     0,    0,     0],  # I-Y
+        [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # L-X
+        [     1,     0,     1,     0,     0,    0,     0,     0,     1,    0,     0],  # L-Y
+        [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # U-X
+        [     1,     0,     1,     0,     0,    0,     0,     0,     1,    0,     0],  # U-Y
+        [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # start
+        [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # end
+    ],
+    [
+    #  Only allowed: X entity for X-domain
+        #     O     B-X    B-Y    I-X    I-Y   L-X    L-Y    U-X    U-Y   start   end
+        [     1,     1,     0,     0,     0,    0,     0,     1,     0,    0,     0],  # O
+        [     0,     0,     0,     1,     0,    1,     0,     0,     0,    0,     0],  # B-X
+        [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # B-Y
+        [     0,     0,     0,     1,     0,    1,     0,     0,     0,    0,     0],  # I-X
+        [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # I-Y
+        [     1,     1,     0,     0,     0,    0,     0,     1,     0,    0,     0],  # L-X
+        [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # L-Y
+        [     1,     1,     0,     0,     0,    0,     0,     1,     0,    0,     0],  # U-X
+        [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # U-Y
+        [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # start
+        [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # end
+    ]
+], dtype=np.bool)
+
 constraint_table = generate_constraint_table(right_constraint_mapping, tag_dict)
+
+# diff = np.bitwise_xor(constraint_table, expected_constraint_table)
 
 EPOCHS = 10
 EMBED_DIM = 64

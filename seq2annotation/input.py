@@ -1,5 +1,7 @@
+import collections
 import functools
 import logging
+from collections import OrderedDict
 from typing import Dict, List
 
 import tensorflow as tf
@@ -13,10 +15,13 @@ logger = logging.getLogger(__name__)
 
 class Lookuper(object):
     def __init__(self, index_table: Dict[str, int]):
-        # index_table: str -> int
-        self.index_table = index_table
+        # index_table: str -> int, ordered by key
+        self.index_table = OrderedDict(sorted(index_table.items(), key=lambda x: x[0]))
         # inverse index table: int -> str
-        self.inverse_index_table = {v: k for k, v in self.index_table.items()}  # type: Dict[int, str]
+        self.inverse_index_table = OrderedDict(sorted(
+            [(v, k) for k, v in self.index_table.items()],
+            key=lambda x: x[0]
+        ))  # type: OrderedDict[int, str]
 
     def lookup(self, string):
         if string not in self.index_table:
@@ -145,7 +150,7 @@ def build_gold_generator_func(offset_dataset):
     return functools.partial(generator_func, offset_dataset)
 
 
-def generate_tagset(tags):
+def generate_tagset(tags) -> List[str]:
     if not tags:
         return []
 
@@ -160,6 +165,8 @@ def generate_tagset(tags):
     # this is a bug feature, otherwise sentence_correct is not correct
     # due to the crf decoder, need fix
     tagset_list.remove(BILUOEncoderDecoder.oscar)
+    tagset_list = list(sorted(tagset_list, key=lambda x: x))
+
     tagset_list.insert(0, BILUOEncoderDecoder.oscar)
 
     return tagset_list

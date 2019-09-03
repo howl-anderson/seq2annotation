@@ -99,7 +99,11 @@ class Model(object):
             'embedding_dim': 64,
         }
 
-        vocab_data_file = pkg_resources.resource_filename(__name__,
+        vocab_data_file = self.config.get('vocabulary_file')
+
+        if not vocab_data_file:
+            # no vocabulary file provided, use internal one
+            vocab_data_file = pkg_resources.resource_filename(__name__,
                                                           './data/unicode_char_list.txt')
         params['vocab_data'] = np.loadtxt(vocab_data_file, dtype=np.unicode,
                                           comments=None,

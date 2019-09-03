@@ -34,4 +34,4 @@ ENV HEALTH_CHECK_TRANSPONDER_PORT=9998
 
 EXPOSE 9998
 
-HEALTHCHECK --interval=5s --timeout=3s CMD curl --fail http://localhost:9998/ping || exit 1
+# HEALTHCHECK --interval=5s --timeout=3s CMD curl --fail http://localhost:9998/ping || exit 1

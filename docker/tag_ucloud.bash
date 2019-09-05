@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker push uhub.service.ucloud.cn/algorithm_train/${1}
+docker tag ${1} uhub.service.ucloud.cn/algorithm_train/${1}

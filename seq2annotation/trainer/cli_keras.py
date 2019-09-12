@@ -11,11 +11,15 @@ from ioflow.corpus import get_corpus_processor
 from seq2annotation.input import generate_tagset, Lookuper, \
     index_table_from_file
 from tf_crf_layer.layer import CRF
-from tf_crf_layer.loss import crf_loss
-from tf_crf_layer.metrics import crf_accuracy
+from tf_crf_layer.loss import crf_loss, CrfLoss
+from tf_crf_layer.metrics import crf_accuracy, SequenceCorrectness, SequenceSpanAccuracy, sequence_span_accuracy
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 
+# tf.enable_eager_execution()
+
+
 from seq2annotation import unrandom
+
 
 config = read_configure()
 
@@ -87,6 +91,8 @@ def preprocss(data):
 
     maxlen = max(len(s) for s in raw_x)
 
+    print(">>> maxlen: {}".format(maxlen))
+
     x = tf.keras.preprocessing.sequence.pad_sequences(raw_x, maxlen,
                                                       padding='post')  # right padding
 
@@ -129,7 +135,17 @@ callbacks_list = []
 # )
 # callbacks_list.append(checkpoint_callback)
 
-model.compile('adam', loss=crf_loss, metrics=[crf_accuracy])
+metrics_list = []
+
+metrics_list.append(crf_accuracy)
+metrics_list.append(SequenceCorrectness())
+metrics_list.append(sequence_span_accuracy)
+
+crf_loss_obj = CrfLoss()
+loss_func = crf_loss_obj
+# loss_func = crf_loss
+
+model.compile('adam', loss=loss_func, metrics=metrics_list)
 model.fit(
     train_x, train_y,
     epochs=EPOCHS,

@@ -1,7 +1,6 @@
-ARG BASE_IMAGE_NAME=ner_base-cpu
-ARG BASE_IMAGE_TAG=0.0.1
+ARG BASE_IMAGE=ner_base-cpu:0.0.1
 
-FROM ${BASE_IMAGE_NAME}:${BASE_IMAGE_TAG}
+FROM ${BASE_IMAGE}
 
 LABEL version="0.0.1-beta"
 

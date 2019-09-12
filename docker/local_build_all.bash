@@ -2,7 +2,7 @@
 
 arch=${1:-cpu}
 version=${2:-0.0.1}
-prefix_tag=${3:-}
+prefix_tag=${3:-}  # docker tag prefix used for docker push
 
 base_image=${prefix_tag}ner_base-${arch}:${version}
 (cd ./build_base_image && docker rmi -f ${base_image} && bash build_image.sh ${base_image} ${arch})

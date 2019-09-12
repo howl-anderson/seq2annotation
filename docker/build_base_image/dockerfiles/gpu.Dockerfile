@@ -31,3 +31,6 @@ RUN pip3 install seq2annotation
 RUN pip3 uninstall -y tensorflow
 RUN pip3 uninstall -y tensorflow-gpu
 RUN pip3 install tensorflow-gpu~=1.14
+
+# for fix a stupid bug cased by UCloud which always access /usr/bin/python as python bin
+RUN ln -s /usr/bin/python3 /usr/bin/python

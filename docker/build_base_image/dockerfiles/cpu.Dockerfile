@@ -41,3 +41,6 @@ ENV HEALTH_CHECK_TRANSPONDER_PORT=9998
 EXPOSE 9998
 
 # HEALTHCHECK --interval=5s --timeout=3s CMD curl --fail http://localhost:9998/ping || exit 1
+
+# for fix a stupid bug cased by UCloud which always access /usr/bin/python as python bin
+RUN ln -s /usr/bin/python3 /usr/bin/python

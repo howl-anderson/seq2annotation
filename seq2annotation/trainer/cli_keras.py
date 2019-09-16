@@ -108,16 +108,16 @@ def preprocss(data):
 train_x, train_y = preprocss(train_data)
 test_x, test_y = preprocss(eval_data)
 
-EPOCHS = 10
-EMBED_DIM = 64
-BiRNN_UNITS = 200
+EPOCHS = config['epochs']
+EMBED_DIM = config['embedding_dim']
+BiRNN_UNITS = config['lstm_size']
 
 vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
 
 model = Sequential()
 model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
-model.add(Bidirectional(LSTM(BiRNN_UNITS // 2, return_sequences=True)))
+model.add(Bidirectional(LSTM(BiRNN_UNITS, return_sequences=True)))
 model.add(CRF(tag_size))
 
 # print model summary

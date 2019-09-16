@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-arch=${1:-cpu}
-version=${2:-0.0.1}
+# output docker image name with tag
+output_image=${1:-ner_base-cpu:0.0.1}
 
-docker build --no-cache --force-rm -f ./dockerfiles/${arch}.Dockerfile --tag ner_base-${arch}:${version} .
+# tensorflow type: CPU or GPU
+arch=${2:-cpu}
+
+docker build --no-cache --force-rm -f ./dockerfiles/${arch}.Dockerfile --tag ${output_image} .

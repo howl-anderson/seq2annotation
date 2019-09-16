@@ -3,7 +3,7 @@
   "data_source_scheme": "local",
   "train": "./data/train.conllx",
   "test": "./data/test.conllx",
-  "tags": "data/entity.txt",
+  "tags": "./data/entity.txt",
   "shuffle_pool_size": 1000,
   "batch_size": 512,
   "epochs": 1,

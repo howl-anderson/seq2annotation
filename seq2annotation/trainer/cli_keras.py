@@ -153,4 +153,6 @@ model.fit(
     callbacks=callbacks_list
 )
 
-# tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])
+# Save the model
+model.save(config['h5_model_file'])
+tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])

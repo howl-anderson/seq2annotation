@@ -115,37 +115,41 @@ BiRNN_UNITS = config['lstm_size']
 vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
 
-model = Sequential()
-model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
-model.add(Bidirectional(LSTM(BiRNN_UNITS, return_sequences=True)))
-model.add(CRF(tag_size))
 
-# print model summary
-model.summary()
+mirrored_strategy = tf.distribute.MirroredStrategy()
+with mirrored_strategy.scope():
+    callbacks_list = []
 
-callbacks_list = []
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
+    callbacks_list.append(tensorboard_callback)
 
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
-callbacks_list.append(tensorboard_callback)
+    checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
+        load_weights_on_restart=True,
+        verbose=1
+    )
+    callbacks_list.append(checkpoint_callback)
 
-checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-    os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
-    load_weights_on_restart=True,
-    verbose=1
-)
-callbacks_list.append(checkpoint_callback)
+    metrics_list = []
 
-metrics_list = []
+    metrics_list.append(crf_accuracy)
+    metrics_list.append(SequenceCorrectness())
+    metrics_list.append(sequence_span_accuracy)
 
-metrics_list.append(crf_accuracy)
-metrics_list.append(SequenceCorrectness())
-metrics_list.append(sequence_span_accuracy)
+    crf_loss_obj = CrfLoss()
+    loss_func = crf_loss_obj
+    # loss_func = crf_loss
 
-crf_loss_obj = CrfLoss()
-loss_func = crf_loss_obj
-# loss_func = crf_loss
+    model = Sequential()
+    model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
+    model.add(Bidirectional(LSTM(BiRNN_UNITS, return_sequences=True)))
+    model.add(CRF(tag_size))
 
-model.compile('adam', loss=loss_func, metrics=metrics_list)
+    # print model summary
+    model.summary()
+
+    model.compile('adam', loss=loss_func, metrics=metrics_list)
+
 model.fit(
     train_x, train_y,
     epochs=EPOCHS,

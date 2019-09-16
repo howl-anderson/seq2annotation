@@ -151,7 +151,8 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
     estimator_params['_indices'] = indices
     estimator_params['_num_tags'] = num_tags
 
-    cfg = tf.estimator.RunConfig(save_checkpoints_secs=config['save_checkpoints_secs'])
+    strategy = tf.distribute.MirroredStrategy()
+    cfg = tf.estimator.RunConfig(save_checkpoints_secs=config['save_checkpoints_secs'], train_distribute=strategy)
 
     model_specific_name = '{model_name}-{batch_size}-{learning_rate}-{max_steps}-{max_steps_without_increase}'.format(
         model_name=model_name,

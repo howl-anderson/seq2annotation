@@ -125,15 +125,15 @@ model.summary()
 
 callbacks_list = []
 
-# tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
-# callbacks_list.append(tensorboard_callback)
-#
-# checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-#     os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
-#     load_weights_on_restart=True,
-#     verbose=1
-# )
-# callbacks_list.append(checkpoint_callback)
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
+callbacks_list.append(tensorboard_callback)
+
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
+    load_weights_on_restart=True,
+    verbose=1
+)
+callbacks_list.append(checkpoint_callback)
 
 metrics_list = []
 

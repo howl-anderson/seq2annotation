@@ -11,7 +11,7 @@ from ioflow.corpus import get_corpus_processor
 from seq2annotation.input import generate_tagset, Lookuper, \
     index_table_from_file
 from tf_crf_layer.layer import CRF
-from tf_crf_layer.loss import crf_loss, CrfLoss
+from tf_crf_layer.loss import crf_loss, ConditionalRandomFieldLoss
 from tf_crf_layer.metrics import crf_accuracy, SequenceCorrectness, SequenceSpanAccuracy, sequence_span_accuracy
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 
@@ -118,7 +118,7 @@ tag_size = tag_lookuper.size()
 model = Sequential()
 model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
 model.add(Bidirectional(LSTM(BiRNN_UNITS, return_sequences=True)))
-model.add(CRF(tag_size))
+model.add(CRF(tag_size, name='crf'))
 
 # print model summary
 model.summary()
@@ -141,11 +141,10 @@ metrics_list.append(crf_accuracy)
 metrics_list.append(SequenceCorrectness())
 metrics_list.append(sequence_span_accuracy)
 
-crf_loss_obj = CrfLoss()
-loss_func = crf_loss_obj
+loss_func = ConditionalRandomFieldLoss()
 # loss_func = crf_loss
 
-model.compile('adam', loss=loss_func, metrics=metrics_list)
+model.compile('adam', loss={'crf': loss_func}, metrics=metrics_list)
 model.fit(
     train_x, train_y,
     epochs=EPOCHS,

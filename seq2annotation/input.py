@@ -44,6 +44,13 @@ class Lookuper(object):
 
         return [self.inverse_index_table[i] for i in range(self.size())]
 
+    @classmethod
+    def load_from_file(cls, data_file):
+        pass
+
+    def dump_to_file(self, data_file):
+        pass
+
 
 def index_table_from_file(vocabulary_file=None):
     index_table = {}

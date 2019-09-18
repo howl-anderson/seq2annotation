@@ -1,21 +1,27 @@
 from typing import List
 
 import keras
+import tensorflow as tf
 
 from tokenizer_tools.tagset.NER.BILUO import BILUOSequenceEncoderDecoder
 from tokenizer_tools.tagset.offset.sequence import Sequence
-from tensorflow.contrib import predictor
 
 from tokenizer_tools.tagset.exceptions import TagSetDecodeError
 
 decoder = BILUOSequenceEncoderDecoder()
+
+from tf_crf_layer.metrics.crf_accuracy import crf_accuracy
+from tf_crf_layer.metrics.sequence_span_accuracy import sequence_span_accuracy
 
 
 class Inference(object):
     def __init__(self, model_path):
         # load model
         self.model_dir = model_path
-        self.predict_fn = predictor.from_saved_model(model_path)
+
+        # TODO: temp bugfix
+        self.model = tf.keras.models.load_model(model_path, custom_objects={"crf_accuracy": crf_accuracy, "sequence_span_accuracy": sequence_span_accuracy})
+        self.predict_fn = self.model.predict
 
     def infer(self, input_text: str):
         infer_result = self._infer(input_text)
@@ -37,17 +43,7 @@ class Inference(object):
             padding='post', truncating='post', value=['<pad>']
         ).tolist()
 
-        # TODO: batch infer will cause padding, which will maybe cause decoder to offset bug.
-        # TODO: feature translate should out of this main program for better compatible with keras and estimator model
-        input_feature = {
-            'words': [[i for i in text] for text in sentence],
-            'words_len': [len(text) for text in raw_sequences],
-        }
-
-        # print(input_feature)
-
-        predictions = self.predict_fn(input_feature)
-        tags_list = predictions['tags']
+        tags_list = self.predict_fn(sentence)
 
         infer_result = []
         for raw_input_text, raw_text, normalized_text, tags in zip(input_list, raw_sequences, sentence, tags_list):
@@ -71,3 +67,7 @@ class Inference(object):
             infer_result.append((raw_input_text, seq, tags_seq, failed))
 
         return infer_result
+
+
+if __name__ == "__main__":
+    pass

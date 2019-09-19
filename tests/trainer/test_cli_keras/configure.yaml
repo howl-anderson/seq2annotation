@@ -3,16 +3,16 @@ data_source_scheme: local
 train: "../data/train.conllx"
 test: "../data/test.conllx"
 tags: "../data/entity.txt"
+vocabulary_file: "../data/unicode_char_small_list.txt"
 shuffle_pool_size: 1000
 
 # model configure
-batch_size: 512
-epochs: 1
+batch_size: 32
+epochs: 10
 intent_field: label
 max_steps: 
 max_steps_without_increase: 15000
-embedding_vocabulary_size: 128003
-embedding_dim: 300
+embedding_dim: 128
 lstm_size: 100
 learning_rate:
 

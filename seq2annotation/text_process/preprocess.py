@@ -8,6 +8,18 @@ from tokenizer_tools.tagset.offset.sequence import Sequence
 from seq2annotation.input import Lookuper
 
 
+def str_to_id(string: Union[str, List[str]], vocabulary_look_table: Lookuper) -> List[int]:
+    id_list = [vocabulary_look_table.lookup(i) for i in string]
+
+    return id_list
+
+
+def id_to_str(id_list: List[int], vocabulary_look_table: Lookuper) -> List[str]:
+    str_list = [vocabulary_look_table.inverse_lookup(id) for id in id_list]
+
+    return str_list
+
+
 def preprocess(
     data: List[Sequence],
     tag_lookup_table: Lookuper,

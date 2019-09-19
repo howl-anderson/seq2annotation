@@ -1,5 +1,6 @@
 import collections
 import functools
+import json
 import logging
 from collections import OrderedDict
 from typing import Dict, List
@@ -23,12 +24,40 @@ class Lookuper(object):
             key=lambda x: x[0]
         ))  # type: OrderedDict[int, str]
 
-    def lookup(self, string):
+    def lookup(self, string: str):
         if string not in self.index_table:
             return 1
             raise ValueError("'{}' not in index_table".format(string))
         else:
             return self.index_table.get(string)
+
+    def lookup_str_list(self, str_list: List[str]) -> List[int]:
+        return list([self.lookup(i) for i in str_list])
+
+    def lookup_list_of_str_list(self, list_of_str_list: List[List[str]]) -> List[List[int]]:
+        list_of_id_list = []
+        for str_list in list_of_str_list:
+            id_list = self.lookup_str_list(str_list)
+            list_of_id_list.append(id_list)
+
+        return list_of_id_list
+
+    def inverse_lookup(self, id_: int):
+        if id_ not in self.inverse_index_table:
+            return 0
+        else:
+            return self.inverse_index_table.get(id_)
+
+    def inverse_lookup_id_list(self, id_list: List[int]):
+        return list([self.inverse_lookup(i) for i in id_list])
+    
+    def inverse_lookup_list_of_id_list(self, list_of_id_list: List[List[int]]):
+        list_of_str_list = []
+        for id_list in list_of_id_list:
+            str_list = self.inverse_lookup_id_list(id_list)
+            list_of_str_list.append(str_list)
+
+        return list_of_str_list
 
     def size(self) -> int:
         return len(self.index_table)
@@ -46,10 +75,19 @@ class Lookuper(object):
 
     @classmethod
     def load_from_file(cls, data_file):
-        pass
+        with open(data_file, 'rt') as fd:
+            # since json or yaml can not guarantee the dict order, list of (key, value) is adopted
+            paired_dict = json.load(fd)
+
+            return cls(dict(paired_dict))
 
     def dump_to_file(self, data_file):
-        pass
+        with open(data_file, 'wt') as fd:
+            # since json or yaml can not guarantee the dict order, list of (key, value) is adopted
+            paired_dict = list((k, v) for k, v in self.index_table.items())
+
+            # set ensure_ascii=False for human readability of dumped file
+            json.dump(paired_dict, fd, ensure_ascii=False)
 
 
 def index_table_from_file(vocabulary_file=None):

@@ -12,16 +12,20 @@ decoder = BILUOSequenceEncoderDecoder()
 
 from tf_crf_layer.metrics.crf_accuracy import crf_accuracy
 from tf_crf_layer.metrics.sequence_span_accuracy import sequence_span_accuracy
+from seq2annotation.input import generate_tagset, Lookuper
 
 
 class Inference(object):
-    def __init__(self, model_path):
+    def __init__(self, model_path, tag_lookup_file=None, vocabulary_lookup_file=None):
         # load model
         self.model_dir = model_path
 
         # TODO: temp bugfix
         self.model = tf.keras.models.load_model(model_path, custom_objects={"crf_accuracy": crf_accuracy, "sequence_span_accuracy": sequence_span_accuracy})
         self.predict_fn = self.model.predict
+
+        self.tag_lookup_table = Lookuper.load_from_file(tag_lookup_file)
+        self.vocabulary_lookup_table = Lookuper.load_from_file(vocabulary_lookup_file)
 
     def infer(self, input_text: str):
         infer_result = self._infer(input_text)
@@ -38,17 +42,21 @@ class Inference(object):
 
         raw_sequences = [[i for i in text] for text in input_list]
 
-        sentence = keras.preprocessing.sequence.pad_sequences(
-            raw_sequences, dtype='object',
-            padding='post', truncating='post', value=['<pad>']
-        ).tolist()
+        id_sequences = self.vocabulary_lookup_table.lookup_list_of_str_list(raw_sequences)
 
-        tags_list = self.predict_fn(sentence)
+        sentence = keras.preprocessing.sequence.pad_sequences(
+            id_sequences, dtype='object',
+            padding='post', truncating='post', value=0
+        )
+
+        tags_id_list = self.predict_fn(sentence)
+
+        tags_list = self.tag_lookup_table.inverse_lookup_list_of_id_list(tags_id_list)
 
         infer_result = []
         for raw_input_text, raw_text, normalized_text, tags in zip(input_list, raw_sequences, sentence, tags_list):
             # decode Unicode
-            tags_seq = [i.decode() for i in tags]
+            tags_seq = [i for i in tags]
 
             # print(tags_seq)
 

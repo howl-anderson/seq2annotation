@@ -154,4 +154,6 @@ model.fit(
 
 # Save the model
 model.save(config['h5_model_file'])
+tag_lookuper.dump_to_file('./results/h5_model/tag_lookup_table.json')
+vocabulary_lookuper.dump_to_file('./results/h5_model/vocabulary_lookup_table.json')
 tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])

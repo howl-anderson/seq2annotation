@@ -37,7 +37,12 @@ eval_data = list(eval_data_generator_func())
 
 tag_lookuper = Lookuper({v: i for i, v in enumerate(tags_data)})
 
-vocab_data_file = os.path.join(os.path.dirname(__file__), '../data/unicode_char_list.txt')
+vocab_data_file = config.get("vocabulary_file")
+
+if not vocab_data_file:
+    # load built in vocabulary file
+    vocab_data_file = os.path.join(os.path.dirname(__file__), '../data/unicode_char_list.txt')
+
 vocabulary_lookuper = index_table_from_file(vocab_data_file)
 
 

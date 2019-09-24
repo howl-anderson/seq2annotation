@@ -34,7 +34,7 @@ if not is_tensorflow_installed():
 
 setup(
     name="seq2annotation",
-    version="0.6.4",
+    version="0.6.5",
     packages=setuptools.find_packages(),
     include_package_data=True,
     url="https://github.com/howl-anderson/seq2annotation",

@@ -14,8 +14,8 @@ from ioflow.corpus import get_corpus_processor
 from seq2annotation.input import generate_tagset, Lookuper, \
     index_table_from_file
 from tf_crf_layer.layer import CRF
-from tf_crf_layer.loss import crf_loss
-from tf_crf_layer.metrics import crf_accuracy
+from tf_crf_layer.loss import crf_loss, ConditionalRandomFieldLoss
+from tf_crf_layer.metrics import crf_accuracy, sequence_span_accuracy, SequenceCorrectness
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 
 config = read_configure()
@@ -178,9 +178,9 @@ constraint_table = generate_constraint_table(right_constraint_mapping, tag_dict)
 
 # diff = np.bitwise_xor(constraint_table, expected_constraint_table)
 
-EPOCHS = 10
-EMBED_DIM = 64
-BiRNN_UNITS = 200
+EPOCHS = config['epochs']
+EMBED_DIM = config['embedding_dim']
+BiRNN_UNITS = config['lstm_size']
 
 vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
@@ -197,7 +197,8 @@ bilstm_layer = Bidirectional(LSTM(BiRNN_UNITS // 2, return_sequences=True))(embe
 
 crf_layer = CRF(
     units=tag_size,
-    transition_constraint_matrix=constraint_table
+    transition_constraint_matrix=constraint_table,
+    name='crf'
 )
 
 dynamic_constraint_input = layers.Input(shape=(intent_number,))
@@ -221,7 +222,16 @@ callbacks_list = []
 # )
 # callbacks_list.append(checkpoint_callback)
 
-model.compile('adam', loss=crf_loss, metrics=[crf_accuracy])
+metrics_list = []
+
+metrics_list.append(crf_accuracy)
+metrics_list.append(SequenceCorrectness())
+metrics_list.append(sequence_span_accuracy)
+
+loss_func = ConditionalRandomFieldLoss()
+
+model.compile('adam', loss={'crf': loss_func}, metrics=metrics_list)
+
 model.fit(
     [train_x, train_intent], train_y,
     epochs=EPOCHS,
@@ -229,4 +239,9 @@ model.fit(
     callbacks=callbacks_list
 )
 
-# tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])
+# Save the model
+model.save(config['h5_model_file'])
+tag_lookuper.dump_to_file('./results/h5_model/tag_lookup_table.json')
+vocabulary_lookuper.dump_to_file('./results/h5_model/vocabulary_lookup_table.json')
+tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])
+

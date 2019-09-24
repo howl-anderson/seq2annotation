@@ -15,9 +15,15 @@ from seq2annotation.input import generate_tagset, Lookuper, \
     index_table_from_file
 from tf_crf_layer.crf_helper import allowed_transitions
 from tf_crf_layer.layer import CRF
-from tf_crf_layer.loss import crf_loss
-from tf_crf_layer.metrics import crf_accuracy
+from tf_crf_layer.loss import crf_loss, ConditionalRandomFieldLoss
+from tf_crf_layer.metrics import crf_accuracy, SequenceCorrectness, sequence_span_accuracy
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
+
+# tf.enable_eager_execution()
+
+
+from seq2annotation import unrandom
+
 
 config = read_configure()
 
@@ -35,7 +41,12 @@ eval_data = list(eval_data_generator_func())
 
 tag_lookuper = Lookuper({v: i for i, v in enumerate(tags_data)})
 
-vocab_data_file = os.path.join(os.path.dirname(__file__), '../data/unicode_char_list.txt')
+vocab_data_file = config.get("vocabulary_file")
+
+if not vocab_data_file:
+    # load built in vocabulary file
+    vocab_data_file = os.path.join(os.path.dirname(__file__), '../data/unicode_char_list.txt')
+
 vocabulary_lookuper = index_table_from_file(vocab_data_file)
 
 
@@ -122,9 +133,9 @@ def preprocss(data, maxlen=None, intent_lookup_table=None):
 train_x, train_intent, train_y, intent_lookup_table = preprocss(train_data, 25)
 test_x, test_intent, test_y, _ = preprocss(eval_data, 25, intent_lookup_table)
 
-EPOCHS = 10
-EMBED_DIM = 64
-BiRNN_UNITS = 200
+EPOCHS = config['epochs']
+EMBED_DIM = config['embedding_dim']
+BiRNN_UNITS = config['lstm_size']
 
 vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
@@ -134,24 +145,32 @@ allowed = allowed_transitions("BIOUL", tag_lookuper.inverse_index_table)
 model = Sequential()
 model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
 model.add(Bidirectional(LSTM(BiRNN_UNITS // 2, return_sequences=True)))
-model.add(CRF(tag_size, transition_constraint=allowed))
+model.add(CRF(tag_size, transition_constraint=allowed, name='crf'))
 
 # print model summary
 model.summary()
 
 callbacks_list = []
 
-# tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
-# callbacks_list.append(tensorboard_callback)
-#
-# checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-#     os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
-#     load_weights_on_restart=True,
-#     verbose=1
-# )
-# callbacks_list.append(checkpoint_callback)
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
+callbacks_list.append(tensorboard_callback)
 
-model.compile('adam', loss=crf_loss, metrics=[crf_accuracy])
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
+    load_weights_on_restart=True,
+    verbose=1
+)
+callbacks_list.append(checkpoint_callback)
+
+metrics_list = []
+
+metrics_list.append(crf_accuracy)
+metrics_list.append(SequenceCorrectness())
+metrics_list.append(sequence_span_accuracy)
+
+loss_func = ConditionalRandomFieldLoss()
+
+model.compile('adam', loss={'crf': loss_func}, metrics=metrics_list)
 model.fit(
     [train_x, train_intent], train_y,
     epochs=EPOCHS,
@@ -159,4 +178,9 @@ model.fit(
     callbacks=callbacks_list
 )
 
-# tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])
+# Save the model
+model.save(config['h5_model_file'])
+tag_lookuper.dump_to_file('./results/h5_model/tag_lookup_table.json')
+vocabulary_lookuper.dump_to_file('./results/h5_model/vocabulary_lookup_table.json')
+tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])
+

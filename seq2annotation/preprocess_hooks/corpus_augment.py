@@ -36,7 +36,7 @@ class CorpusAugment(HookBase):
         new_sentence.text = [i for i in no_tail_text]
         result.append(new_sentence)
 
-        return result
+        return result[-1]
 
 
 if __name__ == "__main__":

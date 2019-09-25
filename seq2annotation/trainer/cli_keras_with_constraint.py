@@ -2,7 +2,7 @@ import json
 import os
 from collections import Counter
 
-import numpy as np
+import numpy
 import tensorflow as tf
 from tensorflow.python.keras import models
 from tensorflow.python.keras.layers import Embedding, Bidirectional, LSTM
@@ -17,6 +17,12 @@ from tf_crf_layer.layer import CRF
 from tf_crf_layer.loss import crf_loss, ConditionalRandomFieldLoss
 from tf_crf_layer.metrics import crf_accuracy, sequence_span_accuracy, SequenceCorrectness
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
+
+# tf.enable_eager_execution()
+
+
+from seq2annotation import unrandom
+
 
 config = read_configure()
 
@@ -35,7 +41,12 @@ eval_data = list(eval_data_generator_func())
 
 tag_lookuper = Lookuper({v: i for i, v in enumerate(tags_data)})
 
-vocab_data_file = os.path.join(os.path.dirname(__file__), '../data/unicode_char_list.txt')
+vocab_data_file = config.get("vocabulary_file")
+
+if not vocab_data_file:
+    # load built in vocabulary file
+    vocab_data_file = os.path.join(os.path.dirname(__file__), '../data/unicode_char_list.txt')
+
 vocabulary_lookuper = index_table_from_file(vocab_data_file)
 
 
@@ -44,8 +55,8 @@ def classification_report(y_true, y_pred, labels):
     Similar to the one in sklearn.metrics,
     reports per classs recall, precision and F1 score
     """
-    y_true = np.asarray(y_true).ravel()
-    y_pred = np.asarray(y_pred).ravel()
+    y_true = numpy.asarray(y_true).ravel()
+    y_pred = numpy.asarray(y_pred).ravel()
     corrects = Counter(yt for yt, yp in zip(y_true, y_pred) if yt == yp)
     y_true_counts = Counter(y_true)
     y_pred_counts = Counter(y_pred)
@@ -74,7 +85,7 @@ def classification_report(y_true, y_pred, labels):
 
 
 def one_hot(a, num_classes):
-    return np.squeeze(np.eye(num_classes)[a.reshape(-1)])
+    return numpy.squeeze(numpy.eye(num_classes)[a.reshape(-1)])
 
 
 def preprocss(data, maxlen=None, intent_lookup_table=None):
@@ -112,8 +123,8 @@ def preprocss(data, maxlen=None, intent_lookup_table=None):
     y = tf.keras.preprocessing.sequence.pad_sequences(raw_y, maxlen, value=0,
                                                       padding='post')
 
-    intent_np_array = np.array(intent_int_list)
-    intent_one_hot = one_hot(intent_np_array, np.max(intent_np_array) + 1)
+    intent_np_array = numpy.array(intent_int_list)
+    intent_one_hot = one_hot(intent_np_array, numpy.max(intent_np_array) + 1)
 
     return x, intent_one_hot, y, intent_lookup_table
 
@@ -141,7 +152,7 @@ right_constraint_mapping = sort_constraint(valid_constraint, intent_lookup_table
 
 tag_dict = tag_lookuper.inverse_index_table
 
-expected_constraint_table = np.array([
+expected_constraint_table = numpy.array([
     [
     #  Only allowed: Y entity for Y-domain
         #     O     B-X    B-Y    I-X    I-Y   L-X    L-Y    U-X    U-Y   start   end
@@ -172,11 +183,11 @@ expected_constraint_table = np.array([
         [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # start
         [     0,     0,     0,     0,     0,    0,     0,     0,     0,    0,     0],  # end
     ]
-], dtype=np.bool)
+], dtype=numpy.bool)
 
 constraint_table = generate_constraint_table(right_constraint_mapping, tag_dict)
 
-# diff = np.bitwise_xor(constraint_table, expected_constraint_table)
+# diff = numpy.bitwise_xor(constraint_table, expected_constraint_table)
 
 EPOCHS = config['epochs']
 EMBED_DIM = config['embedding_dim']
@@ -212,15 +223,15 @@ model.summary()
 
 callbacks_list = []
 
-# tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
-# callbacks_list.append(tensorboard_callback)
-#
-# checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-#     os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
-#     load_weights_on_restart=True,
-#     verbose=1
-# )
-# callbacks_list.append(checkpoint_callback)
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
+callbacks_list.append(tensorboard_callback)
+
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
+    load_weights_on_restart=True,
+    verbose=1
+)
+callbacks_list.append(checkpoint_callback)
 
 metrics_list = []
 
@@ -229,6 +240,7 @@ metrics_list.append(SequenceCorrectness())
 metrics_list.append(sequence_span_accuracy)
 
 loss_func = ConditionalRandomFieldLoss()
+# loss_func = crf_loss
 
 model.compile('adam', loss={'crf': loss_func}, metrics=metrics_list)
 

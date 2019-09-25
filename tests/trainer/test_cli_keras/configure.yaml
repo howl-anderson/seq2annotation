@@ -29,4 +29,4 @@ save_checkpoints_secs: 60
 throttle_secs: 60
 
 # system related
-task_id: ABC123
+task_id: ABC

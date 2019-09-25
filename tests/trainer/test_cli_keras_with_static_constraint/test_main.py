@@ -9,6 +9,9 @@ def test_main():
     # set current working directory to current directory
     os.chdir(current_dir)
 
+    print(">>> current dir:{}".format(current_dir))
+    print(">>> current CWD:{}".format(os.getcwd()))
+
     # clean result dir first
     for target_dir in [
         os.path.join("./results", i)

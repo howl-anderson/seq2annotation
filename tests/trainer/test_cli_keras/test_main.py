@@ -4,6 +4,12 @@ from seq2annotation.utils import remove_content_in_dir, create_dir_if_needed
 
 
 def test_main():
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+
+    # set current working directory to current directory
+    os.chdir(current_dir)
+    print(">>> current CWD:{}".format(os.getcwd()))
+
     # clean result dir first
     for target_dir in [
         os.path.join("./results", i)
@@ -11,11 +17,5 @@ def test_main():
     ]:
         create_dir_if_needed(target_dir)
         remove_content_in_dir(target_dir)
-
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-
-    config_file = os.path.join(current_dir, "./configure.yaml")
-
-    os.environ["_DEFAULT_CONFIG_FILE"] = config_file
 
     import seq2annotation.trainer.cli_keras

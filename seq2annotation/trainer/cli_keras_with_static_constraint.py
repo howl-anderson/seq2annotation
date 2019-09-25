@@ -1,13 +1,10 @@
-import json
 import os
 from collections import Counter
 
-import numpy as np
+import numpy
 import tensorflow as tf
-from tensorflow.python.keras import models
 from tensorflow.python.keras.layers import Embedding, Bidirectional, LSTM
 from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras import layers
 
 from ioflow.configure import read_configure
 from ioflow.corpus import get_corpus_processor
@@ -16,7 +13,7 @@ from seq2annotation.input import generate_tagset, Lookuper, \
 from tf_crf_layer.crf_helper import allowed_transitions
 from tf_crf_layer.layer import CRF
 from tf_crf_layer.loss import crf_loss, ConditionalRandomFieldLoss
-from tf_crf_layer.metrics import crf_accuracy, SequenceCorrectness, sequence_span_accuracy
+from tf_crf_layer.metrics import crf_accuracy, SequenceCorrectness, SequenceSpanAccuracy, sequence_span_accuracy
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 
 # tf.enable_eager_execution()
@@ -55,8 +52,8 @@ def classification_report(y_true, y_pred, labels):
     Similar to the one in sklearn.metrics,
     reports per classs recall, precision and F1 score
     """
-    y_true = np.asarray(y_true).ravel()
-    y_pred = np.asarray(y_pred).ravel()
+    y_true = numpy.asarray(y_true).ravel()
+    y_pred = numpy.asarray(y_pred).ravel()
     corrects = Counter(yt for yt, yp in zip(y_true, y_pred) if yt == yp)
     y_true_counts = Counter(y_true)
     y_pred_counts = Counter(y_pred)
@@ -84,35 +81,23 @@ def classification_report(y_true, y_pred, labels):
                     sum(report2[2]) / N, N) + '\n')
 
 
-def one_hot(a, num_classes):
-    return np.squeeze(np.eye(num_classes)[a.reshape(-1)])
-
-
-def preprocss(data, maxlen=None, intent_lookup_table=None):
+def preprocss(data):
     raw_x = []
     raw_y = []
-    raw_intent = []
 
     for offset_data in data:
         tags = offset_to_biluo(offset_data)
         words = offset_data.text
-        # label = offset_data.extra_attr['domain']
 
         tag_ids = [tag_lookuper.lookup(i) for i in tags]
         word_ids = [vocabulary_lookuper.lookup(i) for i in words]
 
         raw_x.append(word_ids)
         raw_y.append(tag_ids)
-        # raw_intent.append(label)
 
-    # if not intent_lookup_table:
-    #     raw_intent_set = list(set(raw_intent))
-    #     intent_lookup_table = Lookuper({v: i for i, v in enumerate(raw_intent_set)})
+    maxlen = max(len(s) for s in raw_x)
 
-    # intent_int_list = [intent_lookup_table.lookup(i) for i in raw_intent]
-
-    if not maxlen:
-        maxlen = max(len(s) for s in raw_x)
+    print(">>> maxlen: {}".format(maxlen))
 
     x = tf.keras.preprocessing.sequence.pad_sequences(raw_x, maxlen,
                                                       padding='post')  # right padding
@@ -123,15 +108,11 @@ def preprocss(data, maxlen=None, intent_lookup_table=None):
     y = tf.keras.preprocessing.sequence.pad_sequences(raw_y, maxlen, value=0,
                                                       padding='post')
 
-    # intent_np_array = np.array(intent_int_list)
-    # intent_one_hot = one_hot(intent_np_array, np.max(intent_np_array) + 1)
-    intent_one_hot = None
-
-    return x, intent_one_hot, y, intent_lookup_table
+    return x, y
 
 
-train_x, train_intent, train_y, intent_lookup_table = preprocss(train_data, 25)
-test_x, test_intent, test_y, _ = preprocss(eval_data, 25, intent_lookup_table)
+train_x, train_y = preprocss(train_data)
+test_x, test_y = preprocss(eval_data)
 
 EPOCHS = config['epochs']
 EMBED_DIM = config['embedding_dim']
@@ -144,8 +125,8 @@ allowed = allowed_transitions("BIOUL", tag_lookuper.inverse_index_table)
 
 model = Sequential()
 model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
-model.add(Bidirectional(LSTM(BiRNN_UNITS // 2, return_sequences=True)))
-model.add(CRF(tag_size, transition_constraint=allowed, name='crf'))
+model.add(Bidirectional(LSTM(BiRNN_UNITS, return_sequences=True)))
+model.add(CRF(tag_size, transition_constraint=allowed, name="crf"))
 
 # print model summary
 model.summary()
@@ -170,11 +151,13 @@ metrics_list.append(sequence_span_accuracy)
 
 loss_func = ConditionalRandomFieldLoss()
 
+# loss_func = crf_loss
+
 model.compile('adam', loss={'crf': loss_func}, metrics=metrics_list)
 model.fit(
-    [train_x, train_intent], train_y,
+    train_x, train_y,
     epochs=EPOCHS,
-    validation_data=[[test_x, test_intent], test_y],
+    validation_data=[test_x, test_y],
     callbacks=callbacks_list
 )
 
@@ -183,4 +166,3 @@ model.save(config['h5_model_file'])
 tag_lookuper.dump_to_file('./results/h5_model/tag_lookup_table.json')
 vocabulary_lookuper.dump_to_file('./results/h5_model/vocabulary_lookup_table.json')
 tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])
-

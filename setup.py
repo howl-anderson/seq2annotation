@@ -26,6 +26,7 @@ install_requires = [
     "flask",
     "flask-cors",
     "ioflow",
+    "tf-crf-layer"
 ]
 
 if not is_tensorflow_installed():

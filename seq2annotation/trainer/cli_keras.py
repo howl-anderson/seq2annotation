@@ -116,6 +116,7 @@ test_x, test_y = preprocss(eval_data)
 EPOCHS = config['epochs']
 EMBED_DIM = config['embedding_dim']
 BiRNN_UNITS = config['lstm_size']
+CRF_PARAMS = config.get("crf_params", {})
 
 vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
@@ -123,7 +124,7 @@ tag_size = tag_lookuper.size()
 model = Sequential()
 model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
 model.add(Bidirectional(LSTM(BiRNN_UNITS, return_sequences=True)))
-model.add(CRF(tag_size, name='crf'))
+model.add(CRF(tag_size, name='crf', **CRF_PARAMS))
 
 # print model summary
 model.summary()

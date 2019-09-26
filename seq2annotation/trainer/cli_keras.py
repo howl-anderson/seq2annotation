@@ -11,6 +11,7 @@ from ioflow.corpus import get_corpus_processor
 from seq2annotation.input import generate_tagset, Lookuper, \
     index_table_from_file
 from tf_crf_layer.layer import CRF
+from tf_attention_layer.layers.global_attentioin_layer import GlobalAttentionLayer
 from tf_crf_layer.loss import crf_loss, ConditionalRandomFieldLoss
 from tf_crf_layer.metrics import crf_accuracy, SequenceCorrectness, SequenceSpanAccuracy, sequence_span_accuracy
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
@@ -116,6 +117,7 @@ test_x, test_y = preprocss(eval_data)
 EPOCHS = config['epochs']
 EMBED_DIM = config['embedding_dim']
 BiRNN_UNITS = config['lstm_size']
+USE_ATTENTION_LAYER = config.get("use_attention_layer", False)
 
 vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
@@ -123,6 +125,10 @@ tag_size = tag_lookuper.size()
 model = Sequential()
 model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
 model.add(Bidirectional(LSTM(BiRNN_UNITS, return_sequences=True)))
+
+if USE_ATTENTION_LAYER:
+    model.add(GlobalAttentionLayer())
+
 model.add(CRF(tag_size, name='crf'))
 
 # print model summary

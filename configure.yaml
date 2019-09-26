@@ -16,6 +16,7 @@ embedding_vocabulary_size: 128003
 embedding_dim: 300
 lstm_size: 100
 use_attention_layer: true
+max_sentence_len: 45
 learning_rate:
 
 # Data output

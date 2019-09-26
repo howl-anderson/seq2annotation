@@ -81,7 +81,7 @@ def classification_report(y_true, y_pred, labels):
                     sum(report2[2]) / N, N) + '\n')
 
 
-def preprocss(data):
+def preprocss(data, maxlen=None):
     raw_x = []
     raw_y = []
 
@@ -95,7 +95,8 @@ def preprocss(data):
         raw_x.append(word_ids)
         raw_y.append(tag_ids)
 
-    maxlen = max(len(s) for s in raw_x)
+    if maxlen is None:
+        maxlen = max(len(s) for s in raw_x)
 
     print(">>> maxlen: {}".format(maxlen))
 
@@ -111,8 +112,10 @@ def preprocss(data):
     return x, y
 
 
-train_x, train_y = preprocss(train_data)
-test_x, test_y = preprocss(eval_data)
+MAX_SENTENCE_LEN = config.get('max_sentence_len', 25)
+
+train_x, train_y = preprocss(train_data, MAX_SENTENCE_LEN)
+test_x, test_y = preprocss(eval_data, MAX_SENTENCE_LEN)
 
 EPOCHS = config['epochs']
 EMBED_DIM = config['embedding_dim']
@@ -123,7 +126,7 @@ vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
 
 model = Sequential()
-model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
+model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True, input_length=MAX_SENTENCE_LEN))
 model.add(Bidirectional(LSTM(BiRNN_UNITS, return_sequences=True)))
 
 if USE_ATTENTION_LAYER:

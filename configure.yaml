@@ -10,13 +10,17 @@ shuffle_pool_size: 1000
 batch_size: 512
 epochs: 1
 intent_field: label
-max_steps: 
+max_steps:
 max_steps_without_increase: 15000
 embedding_vocabulary_size: 128003
 embedding_dim: 300
 lstm_size: 100
 use_attention_layer: true
 max_sentence_len: 45
+bilstm_stack_config: [
+{units: 100},
+{units: 100},
+]
 learning_rate:
 
 # Data output

@@ -121,13 +121,16 @@ EPOCHS = config['epochs']
 EMBED_DIM = config['embedding_dim']
 BiRNN_UNITS = config['lstm_size']
 USE_ATTENTION_LAYER = config.get("use_attention_layer", False)
+BiLSTM_STACK_CONFIG = config.get("bilstm_stack_config", [])
 
 vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
 
 model = Sequential()
 model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True, input_length=MAX_SENTENCE_LEN))
-model.add(Bidirectional(LSTM(BiRNN_UNITS, return_sequences=True)))
+
+for bilstm_config in BiLSTM_STACK_CONFIG:
+    model.add(Bidirectional(LSTM(return_sequences=True, **bilstm_config)))
 
 if USE_ATTENTION_LAYER:
     model.add(GlobalAttentionLayer())

@@ -21,6 +21,8 @@ bilstm_stack_config: [
 {units: 100},
 {units: 100},
 ]
+use_batch_normalization_after_embedding: true,
+use_batch_normalization_after_bilstm: true,
 learning_rate:
 
 # Data output

@@ -3,7 +3,7 @@ from collections import Counter
 
 import numpy
 import tensorflow as tf
-from tensorflow.python.keras.layers import Embedding, Bidirectional, LSTM
+from tensorflow.python.keras.layers import Embedding, Bidirectional, LSTM, BatchNormalization
 from tensorflow.python.keras.models import Sequential
 
 from ioflow.configure import read_configure
@@ -122,6 +122,8 @@ EMBED_DIM = config['embedding_dim']
 BiRNN_UNITS = config['lstm_size']
 USE_ATTENTION_LAYER = config.get("use_attention_layer", False)
 BiLSTM_STACK_CONFIG = config.get("bilstm_stack_config", [])
+BATCH_NORMALIZATION_AFTER_EMBEDDING_CONFIG = config.get("use_batch_normalization_after_embedding", False)
+BATCH_NORMALIZATION_AFTER_BILSTM_CONFIG = config.get("use_batch_normalization_after_bilstm", False)
 
 vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
@@ -129,8 +131,14 @@ tag_size = tag_lookuper.size()
 model = Sequential()
 model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True, input_length=MAX_SENTENCE_LEN))
 
+if BATCH_NORMALIZATION_AFTER_EMBEDDING_CONFIG:
+    model.add(BatchNormalization())
+
 for bilstm_config in BiLSTM_STACK_CONFIG:
     model.add(Bidirectional(LSTM(return_sequences=True, **bilstm_config)))
+
+if BATCH_NORMALIZATION_AFTER_BILSTM_CONFIG:
+    model.add(BatchNormalization())
 
 if USE_ATTENTION_LAYER:
     model.add(GlobalAttentionLayer())

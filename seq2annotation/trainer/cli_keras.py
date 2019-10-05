@@ -124,11 +124,13 @@ USE_ATTENTION_LAYER = config.get("use_attention_layer", False)
 BiLSTM_STACK_CONFIG = config.get("bilstm_stack_config", [])
 BATCH_NORMALIZATION_AFTER_EMBEDDING_CONFIG = config.get("use_batch_normalization_after_embedding", False)
 BATCH_NORMALIZATION_AFTER_BILSTM_CONFIG = config.get("use_batch_normalization_after_bilstm", False)
+CRF_PARAMS = config.get("crf_params", {})
 
 vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
 
 model = Sequential()
+
 model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True, input_length=MAX_SENTENCE_LEN))
 
 if BATCH_NORMALIZATION_AFTER_EMBEDDING_CONFIG:
@@ -143,7 +145,7 @@ if BATCH_NORMALIZATION_AFTER_BILSTM_CONFIG:
 if USE_ATTENTION_LAYER:
     model.add(GlobalAttentionLayer())
 
-model.add(CRF(tag_size, name='crf'))
+model.add(CRF(tag_size, name='crf', **CRF_PARAMS))
 
 # print model summary
 model.summary()

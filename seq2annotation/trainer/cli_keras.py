@@ -3,7 +3,7 @@ from collections import Counter
 
 import numpy
 import tensorflow as tf
-from tensorflow.python.keras.layers import Embedding, Bidirectional, LSTM
+from tensorflow.python.keras.layers import Embedding, Bidirectional, LSTM, BatchNormalization
 from tensorflow.python.keras.models import Sequential
 
 from ioflow.configure import read_configure
@@ -11,6 +11,7 @@ from ioflow.corpus import get_corpus_processor
 from seq2annotation.input import generate_tagset, Lookuper, \
     index_table_from_file
 from tf_crf_layer.layer import CRF
+from tf_attention_layer.layers.global_attentioin_layer import GlobalAttentionLayer
 from tf_crf_layer.loss import crf_loss, ConditionalRandomFieldLoss
 from tf_crf_layer.metrics import crf_accuracy, SequenceCorrectness, SequenceSpanAccuracy, sequence_span_accuracy
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
@@ -80,7 +81,7 @@ def classification_report(y_true, y_pred, labels):
                     sum(report2[2]) / N, N) + '\n')
 
 
-def preprocss(data):
+def preprocss(data, maxlen=None):
     raw_x = []
     raw_y = []
 
@@ -94,7 +95,8 @@ def preprocss(data):
         raw_x.append(word_ids)
         raw_y.append(tag_ids)
 
-    maxlen = max(len(s) for s in raw_x)
+    if maxlen is None:
+        maxlen = max(len(s) for s in raw_x)
 
     print(">>> maxlen: {}".format(maxlen))
 
@@ -110,19 +112,37 @@ def preprocss(data):
     return x, y
 
 
-train_x, train_y = preprocss(train_data)
-test_x, test_y = preprocss(eval_data)
+MAX_SENTENCE_LEN = config.get('max_sentence_len', 25)
+
+train_x, train_y = preprocss(train_data, MAX_SENTENCE_LEN)
+test_x, test_y = preprocss(eval_data, MAX_SENTENCE_LEN)
 
 EPOCHS = config['epochs']
 EMBED_DIM = config['embedding_dim']
 BiRNN_UNITS = config['lstm_size']
+USE_ATTENTION_LAYER = config.get("use_attention_layer", False)
+BiLSTM_STACK_CONFIG = config.get("bilstm_stack_config", [])
+BATCH_NORMALIZATION_AFTER_EMBEDDING_CONFIG = config.get("use_batch_normalization_after_embedding", False)
+BATCH_NORMALIZATION_AFTER_BILSTM_CONFIG = config.get("use_batch_normalization_after_bilstm", False)
 
 vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
 
 model = Sequential()
-model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
-model.add(Bidirectional(LSTM(BiRNN_UNITS, return_sequences=True)))
+model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True, input_length=MAX_SENTENCE_LEN))
+
+if BATCH_NORMALIZATION_AFTER_EMBEDDING_CONFIG:
+    model.add(BatchNormalization())
+
+for bilstm_config in BiLSTM_STACK_CONFIG:
+    model.add(Bidirectional(LSTM(return_sequences=True, **bilstm_config)))
+
+if BATCH_NORMALIZATION_AFTER_BILSTM_CONFIG:
+    model.add(BatchNormalization())
+
+if USE_ATTENTION_LAYER:
+    model.add(GlobalAttentionLayer())
+
 model.add(CRF(tag_size, name='crf'))
 
 # print model summary

@@ -26,6 +26,7 @@ install_requires = [
     "flask",
     "flask-cors",
     "ioflow",
+    "tf-crf-layer"
 ]
 
 if not is_tensorflow_installed():
@@ -34,7 +35,7 @@ if not is_tensorflow_installed():
 
 setup(
     name="seq2annotation",
-    version="0.6.0",
+    version="0.7.1",
     packages=setuptools.find_packages(),
     include_package_data=True,
     url="https://github.com/howl-anderson/seq2annotation",

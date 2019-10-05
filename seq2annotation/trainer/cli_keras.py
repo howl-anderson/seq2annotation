@@ -11,7 +11,7 @@ from ioflow.corpus import get_corpus_processor
 from seq2annotation.input import generate_tagset, Lookuper, \
     index_table_from_file
 from tf_crf_layer.layer import CRF
-from tf_crf_layer.loss import crf_loss, CrfLoss
+from tf_crf_layer.loss import crf_loss, ConditionalRandomFieldLoss
 from tf_crf_layer.metrics import crf_accuracy, SequenceCorrectness, SequenceSpanAccuracy, sequence_span_accuracy
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 
@@ -37,7 +37,12 @@ eval_data = list(eval_data_generator_func())
 
 tag_lookuper = Lookuper({v: i for i, v in enumerate(tags_data)})
 
-vocab_data_file = os.path.join(os.path.dirname(__file__), '../data/unicode_char_list.txt')
+vocab_data_file = config.get("vocabulary_file")
+
+if not vocab_data_file:
+    # load built in vocabulary file
+    vocab_data_file = os.path.join(os.path.dirname(__file__), '../data/unicode_char_list.txt')
+
 vocabulary_lookuper = index_table_from_file(vocab_data_file)
 
 
@@ -108,32 +113,32 @@ def preprocss(data):
 train_x, train_y = preprocss(train_data)
 test_x, test_y = preprocss(eval_data)
 
-EPOCHS = 10
-EMBED_DIM = 64
-BiRNN_UNITS = 200
+EPOCHS = config['epochs']
+EMBED_DIM = config['embedding_dim']
+BiRNN_UNITS = config['lstm_size']
 
 vacab_size = vocabulary_lookuper.size()
 tag_size = tag_lookuper.size()
 
 model = Sequential()
 model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True))
-model.add(Bidirectional(LSTM(BiRNN_UNITS // 2, return_sequences=True)))
-model.add(CRF(tag_size))
+model.add(Bidirectional(LSTM(BiRNN_UNITS, return_sequences=True)))
+model.add(CRF(tag_size, name='crf'))
 
 # print model summary
 model.summary()
 
 callbacks_list = []
 
-# tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
-# callbacks_list.append(tensorboard_callback)
-#
-# checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-#     os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
-#     load_weights_on_restart=True,
-#     verbose=1
-# )
-# callbacks_list.append(checkpoint_callback)
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
+callbacks_list.append(tensorboard_callback)
+
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
+    load_weights_on_restart=True,
+    verbose=1
+)
+callbacks_list.append(checkpoint_callback)
 
 metrics_list = []
 
@@ -141,11 +146,10 @@ metrics_list.append(crf_accuracy)
 metrics_list.append(SequenceCorrectness())
 metrics_list.append(sequence_span_accuracy)
 
-crf_loss_obj = CrfLoss()
-loss_func = crf_loss_obj
+loss_func = ConditionalRandomFieldLoss()
 # loss_func = crf_loss
 
-model.compile('adam', loss=loss_func, metrics=metrics_list)
+model.compile('adam', loss={'crf': loss_func}, metrics=metrics_list)
 model.fit(
     train_x, train_y,
     epochs=EPOCHS,

@@ -15,6 +15,7 @@ max_steps_without_increase: 15000
 embedding_vocabulary_size: 128003
 embedding_dim: 300
 lstm_size: 100
+crf_params: {use_boundary: true}
 learning_rate:
 
 # Data output

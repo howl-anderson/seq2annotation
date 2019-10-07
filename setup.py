@@ -30,7 +30,7 @@ install_requires = [
 ]
 
 if not is_tensorflow_installed():
-    install_requires.append("tensorflow")  # Will install CPU based TensorFlow
+    install_requires.append("tensorflow>=1.14.0,<2.0.0")  # Will install CPU based TensorFlow
 
 
 setup(

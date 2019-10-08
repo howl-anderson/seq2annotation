@@ -119,7 +119,6 @@ test_x, test_y = preprocss(eval_data, MAX_SENTENCE_LEN)
 
 EPOCHS = config['epochs']
 EMBED_DIM = config['embedding_dim']
-BiRNN_UNITS = config['lstm_size']
 USE_ATTENTION_LAYER = config.get("use_attention_layer", False)
 BiLSTM_STACK_CONFIG = config.get("bilstm_stack_config", [])
 BATCH_NORMALIZATION_AFTER_EMBEDDING_CONFIG = config.get("use_batch_normalization_after_embedding", False)

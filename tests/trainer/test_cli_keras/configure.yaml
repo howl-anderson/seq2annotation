@@ -1,8 +1,8 @@
 # Data source
 data_source_scheme: local
-train: "../data/train.conllx"
-test: "../data/test.conllx"
-tags: "../data/entity.txt"
+train: "./data/train.conllx"
+test: "./data/test.conllx"
+tags: "./data/entity.txt"
 vocabulary_file: "../data/unicode_char_small_list.txt"
 shuffle_pool_size: 1000
 

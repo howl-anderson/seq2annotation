@@ -87,6 +87,12 @@ dist: clean ## builds source and wheel package
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
+.PHONY: dev_install
+dev_install:
+    pip install -e .
+    pip install -r test_requirements.txt
+    pip install -r dev_requirements.txt
+
 .PHONY: update_minor_version
 update_minor_version:
 	bumpversion minor

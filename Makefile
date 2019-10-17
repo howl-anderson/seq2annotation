@@ -53,7 +53,7 @@ clean-test: ## remove test and coverage artifacts
 lint: ## check style with flake8
 	flake8 tokenizer_tools tests
 
-test: ## run tests quickly with the default Python
+test: test_install ## run tests quickly with the default Python
 	py.test
 
 test-all: ## run tests on every Python version with tox
@@ -87,10 +87,12 @@ dist: clean ## builds source and wheel package
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
+.PHONY: test_install
+test_install:
+	pip install -r test_requirements.txt
+
 .PHONY: dev_install
 dev_install:
-	pip install -e .
-	pip install -r test_requirements.txt
 	pip install -r dev_requirements.txt
 
 .PHONY: update_minor_version

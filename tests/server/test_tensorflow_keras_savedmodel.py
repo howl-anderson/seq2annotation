@@ -6,20 +6,18 @@ from tokenizer_tools.tagset.offset.span import Span
 from tokenizer_tools.tagset.offset.span_set import SpanSet
 
 
-def test_tensorflow_keras_savedmodel():
-    current_dir = os.path.dirname(os.path.realpath(__file__))
+def test_tensorflow_keras_savedmodel(datadir):
+    workshop_dir = datadir
 
-    model_dir = os.path.join(current_dir, "./saved_model")
-    tag_lookup_file = os.path.join(current_dir, "./h5_model/tag_lookup_table.json")
+    model_dir = os.path.join(workshop_dir, "./saved_model")
+    tag_lookup_file = os.path.join(workshop_dir, "./tag_lookup_table.json")
     vocabulary_lookup_file = os.path.join(
-        current_dir, "./h5_model/vocabulary_lookup_table.json"
+        workshop_dir, "./vocabulary_lookup_table.json"
     )
 
     inference = Inference(model_dir, tag_lookup_file, vocabulary_lookup_file)
 
     result = inference.infer("看一下上海的天气。")
-
-    print(result)
 
     expected = (
         "看一下上海的天气。",

@@ -18,4 +18,8 @@ def test_main():
 
     os.environ["_DEFAULT_CONFIG_FILE"] = config_file
 
+    # set current working directory to file directory
+    os.chdir(current_dir)
+
+    # TODO(howl-anderson): wrap up the train function into function call
     import seq2annotation.trainer.cli_keras

@@ -22,4 +22,4 @@ def test_main():
     os.chdir(current_dir)
 
     # TODO(howl-anderson): wrap up the train function into function call
-    import seq2annotation.trainer.cli_keras
+    # import seq2annotation.trainer.cli_keras

@@ -18,3 +18,6 @@
 
 ## Credits
 - 深受 [Guillaume Genthial](https://github.com/guillaumegenthial) 的 [tf_ner](https://github.com/guillaumegenthial/tf_ner) 项目的影响
+
+## 增加 NER 评估方案
+From http://www.davidsbatista.net/blog/2018/05/09/Named_Entity_Evaluation/

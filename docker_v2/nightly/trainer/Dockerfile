@@ -4,15 +4,6 @@ LABEL version="0.0.1-beta"
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
-# for setup local mirror
-RUN apt-get update && apt-get install -y \
-    apt-transport-https \
-    ca-certificates \
-    apt-utils
-
-# setup local mirror
-COPY sources.list  /etc/apt/sources.list
-
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y git
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y locales

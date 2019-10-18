@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:1.15.0
+FROM tensorflow/tensorflow:1.15.0-py3-jupyter
 
 LABEL version="0.0.1-beta"
 

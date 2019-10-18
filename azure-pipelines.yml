@@ -33,6 +33,6 @@ steps:
   
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)/dist'
+    targetPath: '$(System.DefaultWorkingDirectory)'
     artifact: 'seq2annotaion_package'
   displayName: 'Publish artifact'

@@ -1,0 +1,38 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+strategy:
+  matrix:
+    Python36:
+      python.version: '3.6'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(python.version)'
+  displayName: 'Use Python $(python.version)'
+
+- script: |
+    pip install -e .
+  displayName: 'Install myself'
+
+- script: |
+    pip install -r ./dev_requirements.txt
+    pip install -r ./test_requirements.txt
+  displayName: 'Install depdnencies'
+
+- script: |
+    make test
+  displayName: 'run test'
+
+- script: |
+    make dist
+  displayName: 'build pacakge'
+  
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(System.DefaultWorkingDirectory)/dist'
+    artifact: 'seq2annotaion_package'
+  displayName: 'Publish artifact'

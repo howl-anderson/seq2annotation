@@ -1,3 +1,4 @@
 pytest
-pytest-helpers-namespace
 pytest-datadir
+pytest-mock
+requests-mock

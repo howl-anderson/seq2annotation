@@ -1,0 +1,4 @@
+pytest
+pytest-datadir
+pytest-mock
+requests-mock

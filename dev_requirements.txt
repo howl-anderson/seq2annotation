@@ -1,5 +1,3 @@
 bumpversion
 twine
 wheel
-pytest
-pytest-helpers-namespace

@@ -24,6 +24,7 @@ RUN mkdir /data
 WORKDIR /data
 
 COPY builtin_configure.json /app/builtin_configure.json
+COPY entry.bash /app/entry.bash
 
 EXPOSE 5000
 
@@ -31,4 +32,4 @@ EXPOSE 5000
 ENV _DEFAULT_CONFIG_FILE=/data/configure.json
 ENV _BUILTIN_CONFIG_FILE=/app/builtin_configure.json
 
-CMD ["python3", "-m", "seq2annotation.trainer.cli"]
+CMD ["entry.bash"]

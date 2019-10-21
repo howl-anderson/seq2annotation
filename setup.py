@@ -1,24 +1,6 @@
 import setuptools
 from setuptools import setup
 
-
-def is_tensorflow_installed():
-    """
-    detect if tensorflow (no matter CPU or GPU based) installed
-
-    :return: bool, True for tensorflow installed
-    """
-    import importlib
-
-    try:
-        importlib.import_module("tensorflow")
-    except ModuleNotFoundError:
-        return False
-
-    return True
-
-
-# without tensorflow by default
 install_requires = [
     "numpy",
     "keras",
@@ -27,11 +9,9 @@ install_requires = [
     "flask-cors",
     "ioflow",
     "tf-crf-layer",
-    "tf-attention-layer"
+    "tf-attention-layer",
+    "tensorflow>=1.15.0,<2.0.0"
 ]
-
-if not is_tensorflow_installed():
-    install_requires.append("tensorflow>=1.14.0,<2.0.0")  # Will install CPU based TensorFlow
 
 
 setup(

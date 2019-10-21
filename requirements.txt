@@ -17,7 +17,7 @@ Keras-Preprocessing==1.0.5
 Markdown==3.0.1
 MarkupSafe==1.1.0
 nlp-utils==0.1
-nltk==3.3
+nltk==3.4.5
 numpy==1.15.2
 protobuf==3.6.1
 pygtrie==2.3

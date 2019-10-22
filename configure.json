@@ -24,6 +24,5 @@
   "throttle_secs": 60,
   "tpu_name": "",
   "tpu_zone": "",
-  "gcp_project": "",
-  "task_id": "ABC123"
+  "gcp_project": ""
 }

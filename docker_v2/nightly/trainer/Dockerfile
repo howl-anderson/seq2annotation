@@ -32,4 +32,4 @@ EXPOSE 5000
 ENV _DEFAULT_CONFIG_FILE=/data/configure.json
 ENV _BUILTIN_CONFIG_FILE=/app/builtin_configure.json
 
-CMD ["entry.bash"]
+CMD ["bash", "entry.bash"]

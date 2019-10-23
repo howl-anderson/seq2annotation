@@ -27,7 +27,6 @@ COPY entry.bash /app/entry.bash
 EXPOSE 5000
 
 # adjust to ucloud
-ENV _DEFAULT_CONFIG_FILE=/data/configure.json
 ENV _BUILTIN_CONFIG_FILE=/app/builtin_configure.json
 
 CMD ["bash", "/app/entry.bash"]

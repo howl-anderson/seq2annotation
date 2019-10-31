@@ -31,5 +31,5 @@ tensorflow-serving-api==1.11.0
 termcolor==1.1.0
 tf-metrics==0.0.1
 -e git+git@github.com:howl-anderson/tokenizer_tools.git@7e18e85fbc1dbc0235c6d7c0908b7aafe43117ad#egg=tokenizer_tools
-urllib3==1.23
+urllib3==1.24.2
 Werkzeug==0.14.1

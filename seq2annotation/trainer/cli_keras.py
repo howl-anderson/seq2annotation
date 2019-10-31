@@ -8,9 +8,10 @@ from tensorflow.python.keras.models import Sequential
 
 from ioflow.configure import read_configure
 from ioflow.corpus import get_corpus_processor
-from seq2annotation.input import generate_tagset, Lookuper, index_table_from_file
 from seq2annotation.trainer.utils import export_as_deliverable_model
-from seq2annotation.utils import create_dir_if_needed
+from seq2annotation.input import generate_tagset, Lookuper, index_table_from_file
+from seq2annotation.utils import create_dir_if_needed, create_file_dir_if_needed
+
 from tf_crf_layer.layer import CRF
 from tf_crf_layer.loss import crf_loss, ConditionalRandomFieldLoss
 from tf_crf_layer.metrics import (
@@ -137,7 +138,7 @@ model.fit(
 )
 
 # Save the model
-# model.save(create_dir_if_needed(config["h5_model_file"]))
+model.save(create_file_dir_if_needed(config["h5_model_file"]))
 
 
 tf.keras.experimental.export_saved_model(
@@ -149,5 +150,5 @@ export_as_deliverable_model(
     keras_saved_model=config["saved_model_dir"],
     vocabulary_lookup_table=vocabulary_lookuper,
     tag_lookup_table=tag_lookuper,
-    padding_parameter={"maxlen": 25}
+    padding_parameter={"maxlen": 25},
 )

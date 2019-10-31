@@ -15,7 +15,7 @@ max_steps_without_increase: 15000
 embedding_vocabulary_size: 128003
 embedding_dim: 300
 lstm_size: 100
-use_attention_layer: true
+use_attention_layer: false
 max_sentence_len: 45
 bilstm_stack_config: [
 {units: 100},

@@ -7,7 +7,7 @@ vocabulary_file: "./data/unicode_char_list.txt"
 shuffle_pool_size: 1000
 
 # model configure
-batch_size: 512
+batch_size: 32
 epochs: 1
 intent_field: label
 max_steps: 

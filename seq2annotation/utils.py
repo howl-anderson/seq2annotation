@@ -14,6 +14,14 @@ def create_dir_if_needed(directory):
     return directory
 
 
+def create_file_dir_if_needed(file):
+    directory = os.path.dirname(file)
+
+    create_dir_if_needed(directory)
+
+    return file
+
+
 def join_path(a, b):
     return os.path.join(a, str(pathlib.PurePosixPath(b)))
 

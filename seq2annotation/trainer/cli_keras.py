@@ -10,6 +10,7 @@ from ioflow.configure import read_configure
 from ioflow.corpus import get_corpus_processor
 from seq2annotation.input import generate_tagset, Lookuper, \
     index_table_from_file
+from seq2annotation.utils import create_dir_if_needed
 from tf_crf_layer.layer import CRF
 from tf_crf_layer.loss import crf_loss, ConditionalRandomFieldLoss
 from tf_crf_layer.metrics import crf_accuracy, SequenceCorrectness, SequenceSpanAccuracy, sequence_span_accuracy
@@ -130,11 +131,11 @@ model.summary()
 
 callbacks_list = []
 
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=config['summary_log_dir'])
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=create_dir_if_needed(config['summary_log_dir']))
 callbacks_list.append(tensorboard_callback)
 
 checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-    os.path.join(config['model_dir'], 'cp-{epoch:04d}.ckpt'),
+    os.path.join(create_dir_if_needed(config['model_dir']), 'cp-{epoch:04d}.ckpt'),
     load_weights_on_restart=True,
     verbose=1
 )
@@ -158,5 +159,5 @@ model.fit(
 )
 
 # Save the model
-model.save(config['h5_model_file'])
-tf.keras.experimental.export_saved_model(model, config['saved_model_dir'])
+model.save(create_dir_if_needed(config['h5_model_file']))
+tf.keras.experimental.export_saved_model(model, create_dir_if_needed(config['saved_model_dir']))

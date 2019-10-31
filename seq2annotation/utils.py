@@ -11,6 +11,8 @@ def create_dir_if_needed(directory):
         # os.makedirs(directory)
         os.makedirs(directory)
 
+    return directory
+
 
 def join_path(a, b):
     return os.path.join(a, str(pathlib.PurePosixPath(b)))

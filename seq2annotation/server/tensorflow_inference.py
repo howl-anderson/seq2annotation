@@ -38,6 +38,7 @@ class Inference(object):
         ).tolist()
 
         # TODO: batch infer will cause padding, which will maybe cause decoder to offset bug.
+        # TODO: feature translate should out of this main program for better compatible with keras and estimator model
         input_feature = {
             'words': [[i for i in text] for text in sentence],
             'words_len': [len(text) for text in raw_sequences],

@@ -53,7 +53,7 @@ clean-test: ## remove test and coverage artifacts
 lint: ## check style with flake8
 	flake8 tokenizer_tools tests
 
-test: ## run tests quickly with the default Python
+test: test_install ## run tests quickly with the default Python
 	py.test
 
 test-all: ## run tests on every Python version with tox
@@ -79,6 +79,14 @@ servedocs: docs ## compile the docs watching for changes
 release: dist ## package and upload a release
 	twine upload dist/*
 
+nightly_release: nightly_dist ## package and upload a release
+	twine upload dist/*
+
+nightly_dist: clean ## builds source and wheel package
+	_PKG_NAME=s2a-nightly python setup.py egg_info --tag-date --tag-build=DEV sdist
+	_PKG_NAME=s2a-nightly python setup.py egg_info --tag-date --tag-build=DEV bdist_egg
+	ls -l dist
+
 dist: clean ## builds source and wheel package
 	python setup.py sdist
 	python setup.py bdist_wheel
@@ -86,6 +94,14 @@ dist: clean ## builds source and wheel package
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
+
+.PHONY: test_install
+test_install:
+	pip install -r test_requirements.txt
+
+.PHONY: dev_install
+dev_install:
+	pip install -r dev_requirements.txt
 
 .PHONY: update_minor_version
 update_minor_version:

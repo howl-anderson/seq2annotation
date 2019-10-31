@@ -1,6 +1,23 @@
 import os
 import pathlib
+import shutil
 from typing import Text, Any, Type
+
+
+def remove_files_in_dir(data_dir):
+    input_file_list = [i.absolute() for i in pathlib.Path(data_dir).iterdir() if i.is_file()]
+    for i in input_file_list:
+        os.remove(i)
+
+
+def remove_content_in_dir(data_dir):
+    input_file_list = pathlib.Path(data_dir).iterdir()
+    for i in input_file_list:
+        file_path = str(i.absolute())
+        if i.is_dir():
+            shutil.rmtree(file_path)
+        else:
+            os.remove(file_path)
 
 
 def create_dir_if_needed(directory):

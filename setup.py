@@ -1,3 +1,5 @@
+import os
+
 import setuptools
 from setuptools import setup
 
@@ -15,7 +17,7 @@ install_requires = [
 
 
 setup(
-    name="seq2annotation",
+    name=os.getenv("_PKG_NAME", "seq2annotation"),  # _PKG_NAME will be used in Makefile for dev release
     version="0.8.0",
     packages=setuptools.find_packages(),
     include_package_data=True,

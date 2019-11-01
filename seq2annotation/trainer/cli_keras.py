@@ -3,7 +3,12 @@ from collections import Counter
 
 import numpy
 import tensorflow as tf
-from tensorflow.python.keras.layers import Embedding, Bidirectional, LSTM, BatchNormalization
+from tensorflow.python.keras.layers import (
+    Embedding,
+    Bidirectional,
+    LSTM,
+    BatchNormalization,
+)
 from tensorflow.python.keras.models import Sequential
 
 from ioflow.configure import read_configure
@@ -89,18 +94,22 @@ def preprocss(data, maxlen):
     return x, y
 
 
-MAX_SENTENCE_LEN = config.get('max_sentence_len', 25)
+MAX_SENTENCE_LEN = config.get("max_sentence_len", 25)
 
 train_x, train_y = preprocss(train_data, MAX_SENTENCE_LEN)
 test_x, test_y = preprocss(eval_data, MAX_SENTENCE_LEN)
 
-EPOCHS = config['epochs']
-EMBED_DIM = config['embedding_dim']
-BiRNN_UNITS = config['lstm_size']
+EPOCHS = config["epochs"]
+EMBED_DIM = config["embedding_dim"]
+BiRNN_UNITS = config["lstm_size"]
 USE_ATTENTION_LAYER = config.get("use_attention_layer", False)
 BiLSTM_STACK_CONFIG = config.get("bilstm_stack_config", [])
-BATCH_NORMALIZATION_AFTER_EMBEDDING_CONFIG = config.get("use_batch_normalization_after_embedding", False)
-BATCH_NORMALIZATION_AFTER_BILSTM_CONFIG = config.get("use_batch_normalization_after_bilstm", False)
+BATCH_NORMALIZATION_AFTER_EMBEDDING_CONFIG = config.get(
+    "use_batch_normalization_after_embedding", False
+)
+BATCH_NORMALIZATION_AFTER_BILSTM_CONFIG = config.get(
+    "use_batch_normalization_after_bilstm", False
+)
 CRF_PARAMS = config.get("crf_params", {})
 
 vacab_size = vocabulary_lookuper.size()
@@ -108,7 +117,9 @@ tag_size = tag_lookuper.size()
 
 model = Sequential()
 
-model.add(Embedding(vacab_size, EMBED_DIM, mask_zero=True, input_length=MAX_SENTENCE_LEN))
+model.add(
+    Embedding(vacab_size, EMBED_DIM, mask_zero=True, input_length=MAX_SENTENCE_LEN)
+)
 
 if BATCH_NORMALIZATION_AFTER_EMBEDDING_CONFIG:
     model.add(BatchNormalization())
@@ -122,7 +133,7 @@ if BATCH_NORMALIZATION_AFTER_BILSTM_CONFIG:
 if USE_ATTENTION_LAYER:
     model.add(GlobalAttentionLayer())
 
-model.add(CRF(tag_size, name='crf', **CRF_PARAMS))
+model.add(CRF(tag_size, name="crf", **CRF_PARAMS))
 
 
 # print model summary
@@ -165,7 +176,7 @@ model.save(create_file_dir_if_needed(config["h5_model_file"]))
 
 
 tf.keras.experimental.export_saved_model(
-    model, create_dir_if_needed(config["saved_model_dir"])
+    model, create_dir_if_needed(config["saved_model_dir"]), serving_only=True
 )
 
 export_as_deliverable_model(
@@ -173,5 +184,7 @@ export_as_deliverable_model(
     keras_saved_model=config["saved_model_dir"],
     vocabulary_lookup_table=vocabulary_lookuper,
     tag_lookup_table=tag_lookuper,
-    padding_parameter={"maxlen": 25},
+    padding_parameter={"maxlen": MAX_SENTENCE_LEN, "value": 0, "padding": "post"},
+    addition_model_dependency=["tf-crf-layer"],
+    custom_object_dependency=["tf_crf_layer"],
 )

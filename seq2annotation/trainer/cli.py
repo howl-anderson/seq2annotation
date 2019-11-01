@@ -1,4 +1,7 @@
+from typing import Any
 
+from deliverable_model.request import Request
+from deliverable_model.response import Response
 from deliverable_model.utils import create_dir_if_needed
 from ioflow.corpus import get_corpus_processor
 from ioflow.eval_reporter import get_eval_reporter
@@ -88,8 +91,27 @@ task_status.send_status(task_status.START_UPLOAD_MODEL)
 model_saver = get_model_saver(config)
 model_saver.save_model(final_saved_model)
 
+
+def converter_for_request(request: Request) -> Any:
+    return {
+        "words": request.query,
+        "words_len": [
+            len(list(filter(lambda x: x != 0.0, text))) for text in request.query
+        ],
+    }
+
+
+def converter_for_response(response: Any) -> Response:
+    from deliverable_model.response import Response
+
+    return Response(response["tags"])
+
+
 export_as_deliverable_model(
-    create_dir_if_needed(config["deliverable_model_dir"]), tensorflow_saved_model=final_saved_model
+    create_dir_if_needed(config["deliverable_model_dir"]),
+    tensorflow_saved_model=final_saved_model,
+    converter_for_request=converter_for_request,
+    converter_for_response=converter_for_response
 )
 
 task_status.send_status(task_status.DONE)

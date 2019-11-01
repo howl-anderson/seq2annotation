@@ -4,6 +4,8 @@ from typing import Union, List
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
+import tensorflow as tf
+
 from deliverable_model.builtin.processor.biluo_decode_processor import PredictResult
 from deliverable_model.request import Request
 from deliverable_model.serving import DeliverableModel
@@ -18,6 +20,7 @@ server = None  # type: DeliverableModel
 
 def load_predict_fn(export_dir):
     global server
+
     server = DeliverableModel.load(export_dir)
 
     return server
@@ -51,8 +54,6 @@ def single_tokenizer():
 
     response_obj = server.parse(request_obj)
 
-    print(response_obj.data)
-
     return compose_http_response(response_obj.data)
 
 
@@ -67,7 +68,19 @@ def batch_infer():
     return compose_http_response(response_obj.data)
 
 
+def simple_test():
+    text_msg = "今天拉萨的天气。"
+
+    request_obj = Request([[i for i in text_msg]])
+
+    response_obj = server.parse(request_obj)
+
+    print(response_obj.data)
+
+
 if __name__ == "__main__":
     load_predict_fn(sys.argv[1])
+
+    simple_test()
 
     app.run(host="0.0.0.0", port=5000)

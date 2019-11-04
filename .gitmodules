@@ -1,0 +1,3 @@
+[submodule "seq2annotation/server/NLP_server_frontend"]
+	path = seq2annotation/server/NLP_server_frontend
+	url = git@github.com:howl-anderson/NLP_server_frontend.git

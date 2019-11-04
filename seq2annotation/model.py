@@ -9,8 +9,9 @@ from seq2annotation import utils
 
 
 class Model(object):
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, native_config):
+        self.native_config = native_config
+        self.config = None
 
     def train_and_eval_then_save(self, train_inpf, eval_inpf, configure):
         evaluate_result, export_results, final_saved_model = train_model(
@@ -23,9 +24,16 @@ class Model(object):
 
         return evaluate_result, export_results, final_saved_model
 
+    def get_effective_config(self):
+        # TODO
+        self.config = self.get_default_config()
+        self.config.update(self.native_config)
+
+        return self.config
+
     def get_default_config(self):
-        data_dir = self.config.pop("data_dir", ".")
-        result_dir = self.config.pop("result_dir", ".")
+        data_dir = self.native_config.pop("data_dir", ".")
+        result_dir = self.native_config.pop("result_dir", ".")
 
         params = {
             "dim": 300,
@@ -72,7 +80,7 @@ class Model(object):
             "embedding_dim": 64,
         }
 
-        vocab_data_file = self.config.get("vocabulary_file")
+        vocab_data_file = self.native_config.get("vocabulary_file")
 
         if not vocab_data_file:
             # no vocabulary file provided, use internal one

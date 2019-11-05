@@ -18,9 +18,10 @@ use_attention_layer: false
 max_sentence_len: 45
 bilstm_stack_config: [
 {units: 100},
+# {units: 100, activation: 'seq2annotation.tf.python.keras.activations.relu6', recurrent_activation: 'seq2annotation.tf.python.keras.activations.relu6'},
 ]
-use_batch_normalization_after_embedding: false,
-use_batch_normalization_after_bilstm: false,
+use_batch_normalization_after_embedding: false
+use_batch_normalization_after_bilstm: false
 crf_params: {use_boundary: true}
 learning_rate:
 

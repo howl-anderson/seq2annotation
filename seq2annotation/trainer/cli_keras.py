@@ -99,9 +99,8 @@ MAX_SENTENCE_LEN = config.get("max_sentence_len", 25)
 train_x, train_y = preprocss(train_data, MAX_SENTENCE_LEN)
 test_x, test_y = preprocss(eval_data, MAX_SENTENCE_LEN)
 
-EPOCHS = config["epochs"]
-EMBED_DIM = config["embedding_dim"]
-BiRNN_UNITS = config["lstm_size"]
+EPOCHS = config['epochs']
+EMBED_DIM = config['embedding_dim']
 USE_ATTENTION_LAYER = config.get("use_attention_layer", False)
 BiLSTM_STACK_CONFIG = config.get("bilstm_stack_config", [])
 BATCH_NORMALIZATION_AFTER_EMBEDDING_CONFIG = config.get(

@@ -84,4 +84,5 @@ if __name__ == "__main__":
 
     simple_test()
 
-    app.run(host="0.0.0.0", port=5000)
+    # set threaded to false because keras based models are not thread safety when prediction
+    app.run(host="0.0.0.0", port=5000, threaded=False)

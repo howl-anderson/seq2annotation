@@ -130,3 +130,11 @@ build_docker_nightly_build_server: dist
 	cp -r dist docker_v2/nightly/server/
 	docker rmi -f ner_server
 	docker build --no-cache --force-rm --tag ner_server --file docker_v2/nightly/server/Dockerfile docker_v2/nightly/server/
+
+.PHONY: run_docker_nightly_build_server
+run_docker_nightly_build_server:
+	docker run --rm -p 5000:5000 -v /home/howl/workshop/seq2annotation_keras_ner_on_ecarx/results/deliverable_model:/model ner_server
+
+.PHONY: run_docker_nightly_build_trainer
+run_docker_nightly_build_trainer:
+	docker run --runtime=nvidia --rm -v /home/howl/PycharmProjects/seq2annotation:/data ner_trainer

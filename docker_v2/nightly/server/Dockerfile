@@ -11,7 +11,7 @@ RUN locale-gen en_US.UTF-8
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 # need out-of-bound effect move nightly build packge to workshop dir
-COPY seq2annotation-*.whl /tmp/
+COPY dist/seq2annotation-*.whl /tmp/
 RUN pip3 install /tmp/seq2annotation-*.whl
 
 # for fix a stupid bug cased by UCloud which always access /usr/bin/python as python bin

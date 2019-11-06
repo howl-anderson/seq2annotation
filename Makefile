@@ -114,3 +114,19 @@ update_patch_version:
 .PHONY: update_major_version
 update_major_version:
 	bumpversion major
+
+
+.PHONY: build_docker_nightly_build
+build_docker_nightly_build: build_docker_nightly_build_trainer build_docker_nightly_build_server
+
+.PHONY: build_docker_nightly_build_trainer
+build_docker_nightly_build_trainer: dist
+	cp -r dist docker_v2/nightly/trainer/
+	docker rmi -f ner_trainer
+	docker build --no-cache --force-rm --tag ner_trainer --file docker_v2/nightly/trainer/Dockerfile docker_v2/nightly/trainer/
+
+.PHONY: build_docker_nightly_build_server
+build_docker_nightly_build_server: dist
+	cp -r dist docker_v2/nightly/server/
+	docker rmi -f ner_server
+	docker build --no-cache --force-rm --tag ner_server --file docker_v2/nightly/server/Dockerfile docker_v2/nightly/server/

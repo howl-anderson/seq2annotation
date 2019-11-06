@@ -1,4 +1,9 @@
 # Created by .ignore support plugin (hsz.mobi)
-data
-results
 blackbox_tests
+build
+data
+dist
+results
+seq2annotation.egg-info
+test_tf_bugs
+tests

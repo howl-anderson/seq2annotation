@@ -25,6 +25,7 @@ WORKDIR /data
 
 COPY builtin_configure.json /app/builtin_configure.json
 COPY entry.bash /app/entry.bash
+COPY keras_entry.bash /app/keras_entry.bash
 
 EXPOSE 5000
 

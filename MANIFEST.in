@@ -1,1 +1,3 @@
 include seq2annotation/data/unicode_char_list.txt
+recursive-include seq2annotation/server/NLP_server_frontend *
+recursive-exclude seq2annotation/server/NLP_server_frontend/.git *

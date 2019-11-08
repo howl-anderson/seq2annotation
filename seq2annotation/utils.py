@@ -58,12 +58,12 @@ def class_from_module_path(module_path: Text) -> Type[Any]:
         return getattr(m, class_name)
     else:
         return globals()[module_path]
-    
+
 
 def load_hook(hook_config):
     hook_instances = []
     for i in hook_config:
         class_ = class_from_module_path(i['class'])
         hook_instances.append(class_(**i.get('params', {})))
-        
+
     return hook_instances

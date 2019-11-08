@@ -50,7 +50,7 @@ class Lookuper(object):
 
     def inverse_lookup_id_list(self, id_list: List[int]):
         return list([self.inverse_lookup(i) for i in id_list])
-    
+
     def inverse_lookup_list_of_id_list(self, list_of_id_list: List[List[int]]):
         list_of_str_list = []
         for id_list in list_of_id_list:
@@ -185,9 +185,9 @@ def build_input_func(data_generator_func, config=None):
     def input_func():
         train_dataset = parse_to_dataset(data_generator_func, config, shuffle_and_repeat=True)
         data_iterator = dataset_to_feature_column(train_dataset)
-        
+
         return data_iterator
-    
+
     return input_func
 
 
@@ -205,7 +205,7 @@ def generate_tagset(tags) -> List[str]:
         tagset.update(encoder.all_tag_set())
 
     tagset_list = list(tagset)
-    
+
     # make sure O is first tag,
     # this is a bug feature, otherwise sentence_correct is not correct
     # due to the crf decoder, need fix
@@ -215,4 +215,3 @@ def generate_tagset(tags) -> List[str]:
     tagset_list.insert(0, BILUOEncoderDecoder.oscar)
 
     return tagset_list
-

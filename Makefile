@@ -50,8 +50,15 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
+formatter:
+	black seq2annotaion tests
+
 lint: ## check style with flake8
-	flake8 tokenizer_tools tests
+	flake8 seq2annotation tests
+	black --check seq2annotation tests
+
+types:
+	pytype --keep-going seq2annotaion
 
 test: test_install ## run tests quickly with the default Python
 	py.test

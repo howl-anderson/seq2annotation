@@ -24,5 +24,4 @@ def test_generator_func():
 
     result = [i for i in result]
 
-
     assert len(result) == 7

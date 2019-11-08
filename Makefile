@@ -58,7 +58,7 @@ lint: ## check style with flake8
 	black --check seq2annotation tests
 
 types:
-	pytype --keep-going seq2annotaion
+	pytype --keep-going seq2annotation
 
 test: test_install ## run tests quickly with the default Python
 	py.test

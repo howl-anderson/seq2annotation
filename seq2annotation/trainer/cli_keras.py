@@ -166,7 +166,7 @@ def main():
     model.save(create_file_dir_if_needed(config["h5_model_file"]))
 
     tf.keras.experimental.export_saved_model(
-        model, create_dir_if_needed(config["saved_model_dir"]), serving_only=True
+        model, create_dir_if_needed(config["saved_model_dir"])
     )
 
     export_as_deliverable_model(

@@ -17,7 +17,7 @@ app.config["JSON_AS_ASCII"] = False
 # app.config['DEBUG'] = True
 CORS(app)
 
-server = None  # type: SimpleModelInference
+server: SimpleModelInference = None
 
 
 def load_predict_fn(export_dir):
@@ -55,7 +55,7 @@ def send_static(path):
 
 @app.route("/parse", methods=["GET"])
 def single_tokenizer():
-    text_msg = request.args.get("q")  # type: str
+    text_msg: str = request.args.get("q")
 
     predict_result = list(server.parse([text_msg]))[0]
 
@@ -71,7 +71,7 @@ def batch_infer():
     return compose_http_response(predict_result_list)
 
 
-def simple_test():
+def warmup_test():
     text_msg = "今天拉萨的天气。"
 
     predict_result = list(server.parse([text_msg]))[0]
@@ -80,9 +80,13 @@ def simple_test():
 
 
 if __name__ == "__main__":
-    load_predict_fn(sys.argv[1])
+    server = load_predict_fn(sys.argv[1])
 
-    simple_test()
+    warmup_test()
 
+    threaded = True
     # set threaded to false because keras based models are not thread safety when prediction
-    app.run(host="0.0.0.0", port=5000, threaded=False)
+    if server.model_metadata["model"]["type"] in ["keras_h5_model", "keras_saved_model"]:
+        threaded = False
+
+    app.run(host="0.0.0.0", port=5000, threaded=threaded)

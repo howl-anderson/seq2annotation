@@ -24,6 +24,8 @@ RUN mkdir /model
 EXPOSE 5000
 VOLUME /model
 
+ENV CUDA_VISIBLE_DEVICES=-1 MODEL_PATH=/model
+
 # value 17 is computed under the guide of https://docs.gunicorn.org/en/stable/settings.html#workers
 # suppose we have a 8 cores CPU, 16G memory
-CMD ["CUDA_VISIBLE_DEVICES=-1", "MODEL_PATH=/model", "gunicorn", "--workers", "17", "seq2annotation.server.http:app"]
+CMD ["gunicorn", "--workers", "17", "seq2annotation.server.http:app"]

@@ -1,6 +1,6 @@
 from typing import Union, Callable
 
-from deliverable_model import MetaContent
+from deliverable_model.metacontent import MetaContent
 from deliverable_model.builder import (
     DeliverableModelBuilder,
     MetadataBuilder,

@@ -13,7 +13,8 @@ install_requires = [
     "tf-crf-layer",
     "tf-attention-layer",
     "tensorflow>=1.15.0,<2.0.0",
-    "deliverable-model"
+    "deliverable-model",
+    "gunicorn"
 ]
 
 

@@ -4,6 +4,7 @@ from typing import Union, List
 
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+from pconf import Pconf
 
 from deliverable_model.builtin.processor.biluo_decode_processor import PredictResult
 from deliverable_model.serving import SimpleModelInference
@@ -79,14 +80,20 @@ def warmup_test():
     print(predict_result)
 
 
+if "gunicorn" in sys.modules:  # when called by gunicorn
+    Pconf.env(whitelist=["MODEL_PATH"])
+    config = Pconf.get()
+    
+    deliverable_server = load_predict_fn(config["MODEL_PATH"])
+
 if __name__ == "__main__":
-    server = load_predict_fn(sys.argv[1])
+    deliverable_server = load_predict_fn(sys.argv[1])
 
     warmup_test()
 
     threaded = True
     # set threaded to false because keras based models are not thread safety when prediction
-    if server.model_metadata["model"]["type"] in ["keras_h5_model", "keras_saved_model"]:
+    if deliverable_server.model_metadata["model"]["type"] in ["keras_h5_model", "keras_saved_model"]:
         threaded = False
 
     app.run(host="0.0.0.0", port=5000, threaded=threaded)

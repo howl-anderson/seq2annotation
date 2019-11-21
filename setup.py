@@ -12,7 +12,8 @@ install_requires = [
     "ioflow",
     "tf-crf-layer",
     "tf-attention-layer",
-    "tensorflow>=1.15.0,<2.0.0",
+    # "tensorflow>=1.15.0,<2.0.0",
+    "tensorflow>=1.14.0,<1.15.0",
     "deliverable-model",
     "gunicorn",
     "micro_toolkit"

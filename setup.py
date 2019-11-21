@@ -14,7 +14,8 @@ install_requires = [
     "tf-attention-layer",
     "tensorflow>=1.15.0,<2.0.0",
     "deliverable-model",
-    "gunicorn"
+    "gunicorn",
+    "micro_toolkit"
 ]
 
 

@@ -21,10 +21,10 @@ CORS(app)
 server: SimpleModelInference = None
 
 
-def load_predict_fn(export_dir):
+def load_predict_fn(export_dir, inference_batch_size=32):
     global server
 
-    server = SimpleModelInference(export_dir)
+    server = SimpleModelInference(export_dir, inference_batch_size)
 
     return server
 
@@ -80,14 +80,19 @@ def warmup_test():
     print(predict_result)
 
 
-if "gunicorn" in sys.modules:  # when called by gunicorn
+if "gunicorn" in sys.modules:  # when called by gunicorn in production environment
+    # disable output log to console
+    import logging
+    log = logging.getLogger("werkzeug")
+    log.disabled = True
+
     Pconf.env(whitelist=["MODEL_PATH"])
     config = Pconf.get()
-    
-    deliverable_server = load_predict_fn(config["MODEL_PATH"])
+
+    deliverable_server = load_predict_fn(config["MODEL_PATH"], 128)
 
 if __name__ == "__main__":
-    deliverable_server = load_predict_fn(sys.argv[1])
+    deliverable_server = load_predict_fn(sys.argv[1], 128)
 
     warmup_test()
 

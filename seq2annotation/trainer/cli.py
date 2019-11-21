@@ -11,8 +11,11 @@ from seq2annotation.trainer.utils import export_as_deliverable_model
 
 
 def converter_for_request(request: Request) -> Any:
+    from micro_toolkit.data_process.text_sequence_padding import TextSequencePadding
+
+    tsp = TextSequencePadding('<pad>')
     return {
-        "words": request.query,
+        "words": tsp.fit(request.query),
         "words_len": [
             len(list(filter(lambda x: x != 0.0, text))) for text in request.query
         ],
@@ -57,7 +60,8 @@ def main():
         create_dir_if_needed(config["deliverable_model_dir"]),
         tensorflow_saved_model=final_saved_model,
         converter_for_request=converter_for_request,
-        converter_for_response=converter_for_response
+        converter_for_response=converter_for_response,
+        addition_model_dependency=["micro_toolkit"]
     )
 
 

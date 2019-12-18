@@ -1,11 +1,14 @@
 import os
 
+import pytest
+
 from seq2annotation.server.tensorflow_keras_h5_inference import Inference
 from tokenizer_tools.tagset.offset.sequence import Sequence
 from tokenizer_tools.tagset.offset.span import Span
 from tokenizer_tools.tagset.offset.span_set import SpanSet
 
 
+@pytest.mark.skip("tf crf layer don't work in tf 1.15")
 def test_tensorflow_keras_h5_inference(datadir):
     workshop_dir = datadir
 

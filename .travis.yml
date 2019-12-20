@@ -9,6 +9,13 @@ python:
 install:
   - pip install -e .
   - pip install -r ./dev_requirements.txt
+  
+# Manually handle git submodules
+git:
+  submodules: false
+before_install:
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
 
 # Command to run tests, e.g. python setup.py test
 script:

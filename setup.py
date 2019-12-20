@@ -16,7 +16,7 @@ install_requires = [
 
 setup(
     name="seq2annotation",
-    version="0.8.3",
+    version="0.8.4",
     packages=setuptools.find_packages(),
     include_package_data=True,
     url="https://github.com/howl-anderson/seq2annotation",

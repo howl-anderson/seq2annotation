@@ -21,7 +21,7 @@ install_requires = [
 
 setup(
     name=os.getenv("_PKG_NAME", "seq2annotation"),  # _PKG_NAME will be used in Makefile for dev release
-    version="0.8.4",
+    version="0.9.0",
     packages=setuptools.find_packages(),
     include_package_data=True,
     url="https://github.com/howl-anderson/seq2annotation",

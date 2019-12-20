@@ -18,9 +18,8 @@ from tf_attention_layer.layers.global_attentioin_layer import GlobalAttentionLay
 from tf_crf_layer.layer import CRF
 from tf_crf_layer.loss import ConditionalRandomFieldLoss
 from tf_crf_layer.metrics import (
-    crf_accuracy,
     SequenceCorrectness,
-    sequence_span_accuracy,
+    SequenceSpanAccuracy
 )
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 
@@ -146,9 +145,8 @@ def main():
 
     metrics_list = []
 
-    metrics_list.append(crf_accuracy)
     metrics_list.append(SequenceCorrectness())
-    metrics_list.append(sequence_span_accuracy)
+    metrics_list.append(SequenceSpanAccuracy)
 
     loss_func = ConditionalRandomFieldLoss()
     # loss_func = crf_loss

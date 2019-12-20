@@ -109,7 +109,7 @@ callbacks_list.append(checkpoint_callback)
 
 metrics_list = []
 
-metrics_list.append(crf_accuracy)
+# metrics_list.append(crf_accuracy)
 metrics_list.append(SequenceCorrectness())
 metrics_list.append(sequence_span_accuracy)
 

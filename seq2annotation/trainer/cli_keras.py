@@ -146,7 +146,7 @@ def main():
     metrics_list = []
 
     metrics_list.append(SequenceCorrectness())
-    metrics_list.append(SequenceSpanAccuracy)
+    metrics_list.append(SequenceSpanAccuracy())
 
     loss_func = ConditionalRandomFieldLoss()
     # loss_func = crf_loss

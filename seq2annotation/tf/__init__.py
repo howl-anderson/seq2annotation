@@ -1,1 +1,0 @@
-from seq2annotation.tf import python

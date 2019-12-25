@@ -197,7 +197,8 @@ def build_gold_generator_func(offset_dataset):
 
 def generate_tagset(tags) -> List[str]:
     if not tags:
-        return []
+        # empty entity still have O tag
+        return [BILUOEncoderDecoder.oscar]
 
     tagset = set()
     for tag in tags:

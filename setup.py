@@ -15,12 +15,14 @@ install_requires = [
     "tensorflow>=1.15.0,<2.0.0",
     "deliverable-model",
     "gunicorn",
-    "micro_toolkit"
+    "micro_toolkit",
 ]
 
 
 setup(
-    name=os.getenv("_PKG_NAME", "seq2annotation"),  # _PKG_NAME will be used in Makefile for dev release
+    # TODO(howl-anderson): learn from TF how to release nightly build
+    # _PKG_NAME will be used in Makefile for dev release
+    name=os.getenv("_PKG_NAME", "seq2annotation"),
     version="0.9.1",
     packages=setuptools.find_packages(),
     include_package_data=True,

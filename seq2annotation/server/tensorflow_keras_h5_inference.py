@@ -10,8 +10,8 @@ from tokenizer_tools.tagset.exceptions import TagSetDecodeError
 
 decoder = BILUOSequenceEncoderDecoder()
 
-from tf_crf_layer.metrics.crf_accuracy import crf_accuracy
-from tf_crf_layer.metrics.sequence_span_accuracy import sequence_span_accuracy
+# don't remove this import, used for auto custom_object discover
+import tf_crf_layer
 from seq2annotation.input import generate_tagset, Lookuper
 
 
@@ -21,7 +21,7 @@ class Inference(object):
         self.model_dir = model_path
 
         # TODO: temp bugfix
-        self.model = tf.keras.models.load_model(model_path, custom_objects={"crf_accuracy": crf_accuracy, "sequence_span_accuracy": sequence_span_accuracy})
+        self.model = tf.keras.models.load_model(model_path)
         self.predict_fn = self.model.predict
 
         self.tag_lookup_table = Lookuper.load_from_file(tag_lookup_file)
@@ -45,7 +45,7 @@ class Inference(object):
         id_sequences = self.vocabulary_lookup_table.lookup_list_of_str_list(raw_sequences)
 
         sentence = keras.preprocessing.sequence.pad_sequences(
-            id_sequences, dtype='object',
+            id_sequences, maxlen=45, dtype='object',
             padding='post', truncating='post', value=0
         )
 

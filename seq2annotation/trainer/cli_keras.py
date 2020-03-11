@@ -17,9 +17,10 @@ from seq2annotation.utils import create_dir_if_needed, create_file_dir_if_needed
 from tf_attention_layer.layers.global_attentioin_layer import GlobalAttentionLayer
 from tf_crf_layer.layer import CRF
 from tf_crf_layer.loss import ConditionalRandomFieldLoss
-from tf_crf_layer.metrics import (
-    SequenceCorrectness,
-    SequenceSpanAccuracy
+from tf_crf_layer.metrics import SequenceCorrectness, SequenceSpanAccuracy
+from deliverable_model.builtin.converter.identical_converters import (
+    ConverterForRequest,
+    ConverterForResponse,
 )
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 
@@ -160,16 +161,18 @@ def main():
         callbacks=callbacks_list,
     )
 
-    # Save the model
-    model.save(create_file_dir_if_needed(config["h5_model_file"]))
+    ## Save the model
+    # model.save(create_file_dir_if_needed(config["h5_model_file"]))
 
-    tf.keras.experimental.export_saved_model(
-        model, create_dir_if_needed(config["saved_model_dir"])
-    )
+    # tf.keras.experimental.export_saved_model(
+    #    model, create_dir_if_needed(config["saved_model_dir"])
+    # )
 
     export_as_deliverable_model(
         create_dir_if_needed(config["deliverable_model_dir"]),
         keras_saved_model=config["saved_model_dir"],
+        converter_for_request=ConverterForRequest(),
+        converter_for_response=ConverterForResponse(),
         vocabulary_lookup_table=vocabulary_lookuper,
         tag_lookup_table=tag_lookuper,
         padding_parameter={"maxlen": MAX_SENTENCE_LEN, "value": 0, "padding": "post"},

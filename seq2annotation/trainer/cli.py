@@ -8,24 +8,11 @@ from ioflow.corpus import get_corpus_processor
 from seq2annotation.input import build_input_func, generate_tagset
 from seq2annotation.model import Model
 from seq2annotation.trainer.utils import export_as_deliverable_model
-
-
-def converter_for_request(request: Request) -> Any:
-    from micro_toolkit.data_process.text_sequence_padding import TextSequencePadding
-
-    tsp = TextSequencePadding('<pad>')
-    return {
-        "words": tsp.fit(request.query),
-        "words_len": [
-            len(list(filter(lambda x: x != 0.0, text))) for text in request.query
-        ],
-    }
-
-
-def converter_for_response(response: Any) -> Response:
-    from deliverable_model.response import Response
-
-    return Response(response["tags"])
+from deliverable_model.converter_base import ConverterBase
+from seq2annotation_for_deliverable.main import (
+    ConverterForRequest,
+    ConverterForResponse,
+)
 
 
 def main():
@@ -59,9 +46,9 @@ def main():
     export_as_deliverable_model(
         create_dir_if_needed(config["deliverable_model_dir"]),
         tensorflow_saved_model=final_saved_model,
-        converter_for_request=converter_for_request,
-        converter_for_response=converter_for_response,
-        addition_model_dependency=["micro_toolkit"]
+        converter_for_request=ConverterForRequest(),
+        converter_for_response=ConverterForResponse(),
+        addition_model_dependency=["micro_toolkit", "seq2annotation_for_deliverable"],
     )
 
 

@@ -202,12 +202,14 @@ class Model(object):
         data = self.call(embeddings, nwords)
 
         data = self.dropout_layer(data)
-        logits = self.dense_layer(data, num_tags)
 
-        crf_params = tf.get_variable("crf", [num_tags, num_tags], dtype=tf.float32)
+        with tf.name_scope("domain-specific"):
+            logits = self.dense_layer(data, num_tags)
 
-        pred_ids = self.crf_decode_layer(logits, crf_params, nwords)
-        pred_strings = self.id2tag(pred_ids, name="predict")
+            crf_params = tf.get_variable("crf", [num_tags, num_tags], dtype=tf.float32)
+
+            pred_ids = self.crf_decode_layer(logits, crf_params, nwords)
+            pred_strings = self.id2tag(pred_ids, name="predict")
 
         # word_strings = self.id2word(word_ids, name='word_strings')
 
@@ -262,9 +264,20 @@ class Model(object):
                     # return tf.estimator.EstimatorSpec(
                     #     self.mode, loss=loss, eval_metric_ops=metrics, evaluation_hooks=[hook])
 
-                    return tf.estimator.EstimatorSpec(
-                        self.mode, loss=loss, eval_metric_ops=metrics
-                    )
+
+                    if config.get("warm_start_dir") is not None:
+                        ws = tf.estimator.WarmStartSettings(
+                            ckpt_to_initialize_from=config.get("warm_start_dir"),
+                            vars_to_warm_start='.*',
+                            var_name_to_vocab_info=None,
+                            var_name_to_prev_var_name=None)
+                        estimator = tf.estimator.Estimator(
+                            model_fn, instance_model_dir, cfg, estimator_params, warm_start_from=ws
+                        )
+                    else:
+                        return tf.estimator.EstimatorSpec(
+                            self.mode, loss=loss, eval_metric_ops=metrics
+                           )
 
             elif self.mode == tf.estimator.ModeKeys.TRAIN:
                 train_op = tf.train.AdamOptimizer(

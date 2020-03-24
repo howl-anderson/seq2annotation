@@ -1,16 +1,13 @@
 import os
 import sys
-from typing import Union, List
 
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from pconf import Pconf
 
-from deliverable_model.builtin.processor.biluo_decode_processor import PredictResult
-from deliverable_model.serving import SimpleModelInference
+import deliverable_model.serving as dm
 
-current_dir = os.path.dirname(__file__)
-http_root_dir = os.path.join(current_dir, "NLP_server_frontend")
+http_root_dir = os.path.join(os.path.dirname(__file__), "NLP_server_frontend")
 
 app = Flask(__name__, static_url_path="", static_folder=http_root_dir)
 
@@ -18,87 +15,103 @@ app.config["JSON_AS_ASCII"] = False
 # app.config['DEBUG'] = True
 CORS(app)
 
-server: SimpleModelInference = None
+model = None
 
 
-def load_predict_fn(export_dir, inference_batch_size=32):
-    global server
+class Model:
+    def __init__(self, model_dir):
+        self.dm_model = dm.load(model_dir)
 
-    server = SimpleModelInference(export_dir, inference_batch_size)
+    def parse(self, query, single_query=False):
+        request = dm.make_request(query=query)
+        response = self.dm_model.inference(request)
 
-    return server
+        result = response.data
+
+        flask_response = self._compose_http_response(result)
+
+        return flask_response
+
+    def _compose_http_response(self, seq_list):
+        return [self._seq_to_http(i) for i in seq_list]
+
+    def _seq_to_http(self, predict):
+        return {
+            "text": "".join(predict.sequence.text),
+            "spans": [
+                {"start": i.start, "end": i.end, "type": i.entity}
+                for i in predict.sequence.span_set
+            ],
+            "ents": list({i.entity.lower() for i in predict.sequence.span_set}),
+            "is_failed": predict.is_failed,
+            "exec_msg": predict.exec_msg,
+        }
 
 
-def seq_to_http(predict: PredictResult):
-    return {
-        "text": "".join(predict.sequence.text),
-        "spans": [
-            {"start": i.start, "end": i.end, "type": i.entity}
-            for i in predict.sequence.span_set
-        ],
-        "ents": list({i.entity.lower() for i in predict.sequence.span_set}),
-    }
+def load_model(export_dir):
+    global model
 
+    model = Model(export_dir)
 
-def compose_http_response(seq_or_seq_list: Union[PredictResult, List[PredictResult]]):
-    if isinstance(seq_or_seq_list, list):
-        result = [seq_to_http(i) for i in seq_or_seq_list]
-    else:
-        result = seq_to_http(seq_or_seq_list)
-
-    return jsonify(result)
+    return model
 
 
 @app.route("/", defaults={"path": "NER.html"})
-def send_static(path):
+def dashboard(path):
     return send_from_directory(http_root_dir, path)
 
 
 @app.route("/parse", methods=["GET"])
-def single_tokenizer():
+def single_infer():
     text_msg: str = request.args.get("q")
 
-    predict_result = list(server.parse([text_msg]))[0]
+    result = model.parse([text_msg])
 
-    return compose_http_response(predict_result)
+    return jsonify(result[0])
 
 
 @app.route("/parse", methods=["POST"])
 def batch_infer():
     text_msg = request.get_json()
 
-    predict_result_list = list(server.parse(text_msg))
+    result = model.parse(text_msg)
 
-    return compose_http_response(predict_result_list)
+    return jsonify(result)
 
 
 def warmup_test():
-    text_msg = "今天拉萨的天气。"
+    with app.app_context():
+        text_msg = "今天拉萨的天气。"
 
-    predict_result = list(server.parse([text_msg]))[0]
+        predict_result = model.parse([text_msg])
 
-    print(predict_result)
+        print(predict_result)
 
 
 if "gunicorn" in sys.modules:  # when called by gunicorn in production environment
     # disable output log to console
     import logging
+
     log = logging.getLogger("werkzeug")
     log.disabled = True
 
     Pconf.env(whitelist=["MODEL_PATH"])
     config = Pconf.get()
 
-    deliverable_server = load_predict_fn(config["MODEL_PATH"], 128)
+    deliverable_server = load_model(config["MODEL_PATH"])
 
 if __name__ == "__main__":
-    deliverable_server = load_predict_fn(sys.argv[1], 128)
+    deliverable_server = load_model(sys.argv[1])
 
     warmup_test()
 
     threaded = True
     # set threaded to false because keras based models are not thread safety when prediction
-    if deliverable_server.model_metadata["model"]["type"] in ["keras_h5_model", "keras_saved_model"]:
-        threaded = False
+    # if deliverable_server.model_metadata["model"]["type"] in [
+    #    "keras_h5_model",
+    #    "keras_saved_model",
+    # ]:
+    #    threaded = False
+    threaded = False
 
     app.run(host="0.0.0.0", port=5000, threaded=threaded)

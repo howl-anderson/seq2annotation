@@ -12,7 +12,7 @@ from tensorflow.python.keras.models import Sequential
 from ioflow.configure import read_configure
 from ioflow.corpus import get_corpus_processor
 from seq2annotation.input import generate_tagset, Lookuper, index_table_from_file
-from seq2annotation.trainer.utils import export_as_deliverable_model
+from seq2annotation.trainer.keras_utils import export_as_deliverable_model
 from seq2annotation.utils import create_dir_if_needed, create_file_dir_if_needed
 from tf_attention_layer.layers.global_attentioin_layer import GlobalAttentionLayer
 from tf_crf_layer.layer import CRF

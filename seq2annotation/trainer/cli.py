@@ -7,7 +7,7 @@ from ioflow.configure import read_configure
 from ioflow.corpus import get_corpus_processor
 from seq2annotation.input import build_input_func, generate_tagset
 from seq2annotation.model import Model
-from seq2annotation.trainer.utils import export_as_deliverable_model
+from seq2annotation.trainer.estimator_utils import export_as_deliverable_model
 from deliverable_model.converter_base import ConverterBase
 from seq2annotation_for_deliverable.main import (
     ConverterForRequest,

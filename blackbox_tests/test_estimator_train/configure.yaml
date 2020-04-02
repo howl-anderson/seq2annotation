@@ -1,0 +1,33 @@
+# Data source
+data_source_scheme: local
+train: "./data/train.conllx"
+test: "./data/test.conllx"
+tags: "./data/entity.txt"
+shuffle_pool_size: 1000
+
+# model configure
+batch_size: 64
+epochs: 1
+intent_field: label
+max_steps: 
+max_steps_without_increase: 15000
+embedding_vocabulary_size: 128003
+embedding_dim: 300
+lstm_size: 100
+learning_rate:
+
+# Data output
+result_dir: "./results"
+params_log_file: "./results/params.json"
+model_dir: "./results/model_dir"
+deliverable_model_dir: "./results/deliverable_model_dir"
+h5_model_file: "./results/h5_model/model.h5"
+saved_model_dir: "./results/saved_model"
+summary_log_dir: "./results/summary_log_dir"
+
+# checkpoint
+save_checkpoints_secs: 60
+throttle_secs: 60
+
+# system related
+task_id: ABC123

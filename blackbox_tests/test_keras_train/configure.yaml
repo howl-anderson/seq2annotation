@@ -6,7 +6,7 @@ tags: "./data/entity.txt"
 shuffle_pool_size: 1000
 
 # model configure
-batch_size: 32
+batch_size: 64
 epochs: 1
 intent_field: label
 max_steps: 
@@ -20,6 +20,7 @@ learning_rate:
 result_dir: "./results"
 params_log_file: "./results/params.json"
 model_dir: "./results/model_dir"
+deliverable_model_dir: "./results/deliverable_model_dir"
 h5_model_file: "./results/h5_model/model.h5"
 saved_model_dir: "./results/saved_model"
 summary_log_dir: "./results/summary_log_dir"

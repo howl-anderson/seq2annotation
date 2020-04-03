@@ -6,9 +6,18 @@ from deliverable_model.builder import (
     MetadataBuilder,
     ProcessorBuilder,
     ModelBuilder,
+    RemoteModelBuilder,
 )
 from deliverable_model.builtin import LookupProcessor
-from deliverable_model.builtin.processor import BILUOEncodeProcessor, PadProcessor, StrTokensConvertProcessor
+from deliverable_model.builtin.processor import (
+    BILUOEncodeProcessor,
+    PadProcessor,
+    StrTokensConvertProcessor,
+)
+from seq2annotation_for_deliverable.main import (
+    RemoteEstimatorConverterForRequest,
+    RemoteEstimatorConverterForResponse,
+)
 
 
 def export_as_deliverable_model(
@@ -59,7 +68,9 @@ def export_as_deliverable_model(
     processor_builder = ProcessorBuilder()
 
     str_tokens_convert_processor = StrTokensConvertProcessor()
-    str_tokens_convert_processor_handle = processor_builder.add_processor(str_tokens_convert_processor)
+    str_tokens_convert_processor_handle = processor_builder.add_processor(
+        str_tokens_convert_processor
+    )
 
     decode_processor = BILUOEncodeProcessor()
     decoder_processor_handle = processor_builder.add_processor(decode_processor)
@@ -84,10 +95,19 @@ def export_as_deliverable_model(
 
     model_builder.save()
 
+    # remote model builder
+    remote_model_builder = RemoteModelBuilder("tf+grpc")
+    remote_model_builder.add_converter_for_request(RemoteEstimatorConverterForRequest())
+    remote_model_builder.add_converter_for_response(
+        RemoteEstimatorConverterForResponse()
+    )
+    remote_model_builder.save()
+
     # compose all the parts
     deliverable_model_builder.add_processor(processor_builder)
     deliverable_model_builder.add_metadata(metadata_builder)
     deliverable_model_builder.add_model(model_builder)
+    deliverable_model_builder.add_remote_model(remote_model_builder)
 
     metadata = deliverable_model_builder.save()
 

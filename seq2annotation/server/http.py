@@ -20,7 +20,13 @@ model = None
 
 class Model:
     def __init__(self, model_dir):
-        self.dm_model = dm.load(model_dir)
+        endpoint = os.getenv("REMOTE_MODEL_ENDPOINT", None)
+        if endpoint:
+            endpoint = dm.make_endpoint_config(target=endpoint, model_name="ner")
+        else:
+            endpoint = None
+
+        self.dm_model = dm.load(model_dir, endpoint)
 
     def parse(self, query, single_query=False):
         request = dm.make_request(query=query)

@@ -3,7 +3,7 @@ data_source_scheme: local
 train: "./data/train.conllx"
 test: "./data/test.conllx"
 tags: "./data/entity.txt"
-vocabulary_file: "../data/unicode_char_small_list.txt"
+vocabulary_file: "./data/unicode_char_small_list.txt"
 shuffle_pool_size: 1000
 
 # model configure
@@ -23,6 +23,7 @@ model_dir: "./results/model_dir"
 h5_model_file: "./results/h5_model/model.h5"
 saved_model_dir: "./results/saved_model"
 summary_log_dir: "./results/summary_log_dir"
+deliverable_model_dir: "./results/deliverable_model_dir"
 
 # checkpoint
 save_checkpoints_secs: 60

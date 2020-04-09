@@ -264,19 +264,9 @@ class Model(object):
                     #     self.mode, loss=loss, eval_metric_ops=metrics, evaluation_hooks=[hook])
 
 
-                    if config.get("warm_start_dir") is not None:
-                        ws = tf.estimator.WarmStartSettings(
-                            ckpt_to_initialize_from=config.get("warm_start_dir"),
-                            vars_to_warm_start='.*',
-                            var_name_to_vocab_info=None,
-                            var_name_to_prev_var_name=None)
-                        estimator = tf.estimator.Estimator(
-                            model_fn, instance_model_dir, cfg, estimator_params, warm_start_from=ws
+                    return tf.estimator.EstimatorSpec(
+                        self.mode, loss=loss, eval_metric_ops=metrics
                         )
-                    else:
-                        return tf.estimator.EstimatorSpec(
-                            self.mode, loss=loss, eval_metric_ops=metrics
-                           )
 
             elif self.mode == tf.estimator.ModeKeys.TRAIN:
                 train_op = tf.train.AdamOptimizer(

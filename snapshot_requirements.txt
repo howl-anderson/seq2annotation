@@ -48,7 +48,7 @@ Keras==2.2.4
 Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.0
 kfac==0.1.4
-lazy-object-proxy==1.4.2
+lazy-object-proxy==1.4.3
 Markdown==3.1.1
 MarkupSafe==1.1.1
 mccabe==0.6.1

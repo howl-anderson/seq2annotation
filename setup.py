@@ -16,6 +16,7 @@ install_requires = [
     "deliverable-model",
     "gunicorn",
     "micro_toolkit",
+    "seq2annotation_for_deliverable"
 ]
 
 

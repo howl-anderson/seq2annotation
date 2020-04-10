@@ -19,7 +19,7 @@ before_install:
 
 # Command to run tests, e.g. python setup.py test
 script:
-  - make test
+  - travis_wait 30 make test
 
 # Assuming you have installed the travis-ci CLI tool, after you
 # create the Github repo and add it to Travis, run the

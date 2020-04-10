@@ -13,7 +13,7 @@ certifi==2019.6.16
 chardet==3.0.4
 Click==7.0
 cloudpickle==1.2.1
-decorator==4.4.0
+decorator==4.4.2
 deepmerge==0.0.5
 -e git+git@github.com:howl-anderson/deliverable_model.git@d1f34c4a719bd392033f3f9c9ccb2dbbcf6ec264#egg=deliverable_model
 dill==0.3.1.1

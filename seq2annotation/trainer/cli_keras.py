@@ -161,12 +161,12 @@ def main():
         callbacks=callbacks_list,
     )
 
-    ## Save the model
-    # model.save(create_file_dir_if_needed(config["h5_model_file"]))
+    # Save the model
+    model.save(create_file_dir_if_needed(config["h5_model_file"]))
 
-    # tf.keras.experimental.export_saved_model(
-    #    model, create_dir_if_needed(config["saved_model_dir"])
-    # )
+    tf.keras.experimental.export_saved_model(
+       model, create_dir_if_needed(config["saved_model_dir"])
+    )
 
     export_as_deliverable_model(
         create_dir_if_needed(config["deliverable_model_dir"]),

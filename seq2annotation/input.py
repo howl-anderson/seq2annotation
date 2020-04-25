@@ -26,7 +26,6 @@ class Lookuper(object):
 
     def lookup(self, string: str):
         if string not in self.index_table:
-            return 1
             raise ValueError("'{}' not in index_table".format(string))
         else:
             return self.index_table.get(string)
@@ -44,7 +43,7 @@ class Lookuper(object):
 
     def inverse_lookup(self, id_: int):
         if id_ not in self.inverse_index_table:
-            return 0
+            raise ValueError("'{}' not in index_table".format(id_))
         else:
             return self.inverse_index_table.get(id_)
 

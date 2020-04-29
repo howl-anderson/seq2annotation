@@ -10,95 +10,21 @@ import tensorflow as tf
 from seq2annotation.utils import class_from_module_path, load_hook
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 from tokenizer_tools.tagset.NER.BILUO import BILUOEncoderDecoder
+from nlp_utils.preprocess.lookup_table import LookupTable as Lookuper
 
 logger = logging.getLogger(__name__)
 
 
-class Lookuper(object):
-    def __init__(self, index_table: Dict[str, int]):
-        # index_table: str -> int, ordered by key
-        self.index_table = OrderedDict(sorted(index_table.items(), key=lambda x: x[0]))
-        # inverse index table: int -> str
-        self.inverse_index_table = OrderedDict(sorted(
-            [(v, k) for k, v in self.index_table.items()],
-            key=lambda x: x[0]
-        ))  # type: OrderedDict[int, str]
-
-    def lookup(self, string: str):
-        if string not in self.index_table:
-            raise ValueError("'{}' not in index_table".format(string))
-        else:
-            return self.index_table.get(string)
-
-    def lookup_str_list(self, str_list: List[str]) -> List[int]:
-        return list([self.lookup(i) for i in str_list])
-
-    def lookup_list_of_str_list(self, list_of_str_list: List[List[str]]) -> List[List[int]]:
-        list_of_id_list = []
-        for str_list in list_of_str_list:
-            id_list = self.lookup_str_list(str_list)
-            list_of_id_list.append(id_list)
-
-        return list_of_id_list
-
-    def inverse_lookup(self, id_: int):
-        if id_ not in self.inverse_index_table:
-            raise ValueError("'{}' not in index_table".format(id_))
-        else:
-            return self.inverse_index_table.get(id_)
-
-    def inverse_lookup_id_list(self, id_list: List[int]):
-        return list([self.inverse_lookup(i) for i in id_list])
-
-    def inverse_lookup_list_of_id_list(self, list_of_id_list: List[List[int]]):
-        list_of_str_list = []
-        for id_list in list_of_id_list:
-            str_list = self.inverse_lookup_id_list(id_list)
-            list_of_str_list.append(str_list)
-
-        return list_of_str_list
-
-    def size(self) -> int:
-        return len(self.index_table)
-
-    def check_id_continuity(self) -> bool:
-        for i in range(self.size()):
-            if i not in self.inverse_index_table:
-                return False
-        return True
-
-    def tolist(self) -> List[str]:
-        assert self.check_id_continuity()
-
-        return [self.inverse_index_table[i] for i in range(self.size())]
-
-    @classmethod
-    def load_from_file(cls, data_file):
-        with open(data_file, 'rt') as fd:
-            # since json or yaml can not guarantee the dict order, list of (key, value) is adopted
-            paired_dict = json.load(fd)
-
-            return cls(dict(paired_dict))
-
-    def dump_to_file(self, data_file):
-        with open(data_file, 'wt') as fd:
-            # since json or yaml can not guarantee the dict order, list of (key, value) is adopted
-            paired_dict = list((k, v) for k, v in self.index_table.items())
-
-            # set ensure_ascii=False for human readability of dumped file
-            json.dump(paired_dict, fd, ensure_ascii=False)
-
-
-def index_table_from_file(vocabulary_file=None):
+def index_table_from_file(vocabulary_file=None, config={}):
     index_table = {}
-    index_counter = 1
+    index_counter = 0
     with open(vocabulary_file) as fd:
         for line in fd:
             key = line.strip('\n')
             index_table[key] = index_counter
             index_counter += 1
 
-    return Lookuper(index_table)
+    return Lookuper(index_table, **config)
 
 
 def read_assets():

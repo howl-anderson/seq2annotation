@@ -111,7 +111,7 @@ termcolor==1.1.0
 -e git+git@github.com:howl-anderson/tf_crf_layer.git@bffbdcc34a155f343e35f7159ea44a63adc41077#egg=tf_crf_layer
 -e git+git@github.com:howl-anderson/tokenizer_tools.git@88bdbb920a2f76a93d8441b635f6dbe20fe1f72b#egg=tokenizer_tools
 toml==0.10.0
-tqdm==4.32.2
+tqdm==4.46.0
 twine==1.13.0
 typed-ast==1.4.0
 uritemplate==3.0.0

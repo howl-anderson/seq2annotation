@@ -24,16 +24,14 @@ for gold_doc in gold_corpus:
     response = dm_model.inference(request)
     result = response.data[0]
 
+    doc = result.sequence
+    doc.id = id_
+
     if result.is_failed:
-        # TODO: Once new BILUO decoder released, this path can be removed
-        doc = Document(text=text)
-        doc.id = id_
         doc.extra_attr["is_failed"] = True
         doc.extra_attr["exec_msg"] = result.exec_msg
         docs_failed.append(doc)
     else:
-        doc = result.sequence
-        doc.id = id_
         docs.append(doc )
 
 Corpus(docs + docs_failed).write_to_file(predicted_corpus_file)

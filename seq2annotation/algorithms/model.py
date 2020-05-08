@@ -201,11 +201,13 @@ class Model(object):
 
         data = self.dropout_layer(data)
 
-        logits = self.dense_layer(data, num_tags)
+        with tf.variable_scope("task_dependent"):
+            logits = self.dense_layer(data, num_tags)
 
-        crf_params = tf.get_variable("crf", [num_tags, num_tags], dtype=tf.float32)
+            crf_params = tf.get_variable("crf", [num_tags, num_tags], dtype=tf.float32)
 
-        pred_ids = self.crf_decode_layer(logits, crf_params, nwords)
+            pred_ids = self.crf_decode_layer(logits, crf_params, nwords)
+
         pred_strings = self.id2tag(pred_ids, name="predict")
 
         # word_strings = self.id2word(word_ids, name='word_strings')
@@ -267,9 +269,16 @@ class Model(object):
                         )
 
             elif self.mode == tf.estimator.ModeKeys.TRAIN:
+                var_list = None
+                if self.params["warm_start_dir"]:
+                    output_vars1 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="task_dependent")
+                    output_vars2 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="task_independent/Variable_1")
+                    var_list=[output_vars1, output_vars2]
+
                 train_op = tf.train.AdamOptimizer(
                     **self.params.get("optimizer_params", {})
-                ).minimize(loss, global_step=tf.train.get_or_create_global_step())
+                ).minimize(loss, global_step=tf.train.get_or_create_global_step(), var_list=var_list)
+
                 if self.params["use_tpu"]:
                     train_op = tf.contrib.tpu.CrossShardOptimizer(train_op)
 

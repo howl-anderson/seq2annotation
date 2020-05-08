@@ -79,8 +79,23 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
             predict_batch_size=estimator_params["batch_size"],
         )
     else:
+        warm_start_setting = None
+        if config.get("warm_start_dir"):
+            # Load embedding & LSTM weights
+            warm_start_setting = tf.estimator.WarmStartSettings(
+                ckpt_to_initialize_from=config.get("warm_start_dir"),
+                vars_to_warm_start=[
+                    "task_independent/Variable_1",
+                    "task_independent/lstm_fused_cell",
+                ],
+            )
+
         estimator = tf.estimator.Estimator(
-            model_fn, instance_model_dir, cfg, estimator_params
+            model_fn,
+            instance_model_dir,
+            cfg,
+            estimator_params,
+            warm_start_from=warm_start_setting,
         )
 
     # Path(estimator.eval_dir()).mkdir(parents=True, exist_ok=True)

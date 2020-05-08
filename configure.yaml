@@ -24,6 +24,7 @@ use_batch_normalization_after_embedding: false
 use_batch_normalization_after_bilstm: false
 crf_params: {use_boundary: true}
 learning_rate:
+warm_start_dir: 
 
 # Data output
 result_dir: "./results"

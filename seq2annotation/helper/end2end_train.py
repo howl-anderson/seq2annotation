@@ -15,14 +15,14 @@ def main(
     test_size=None,
     train_corpus: str = None,
     test_corpus: str = None,
-):
+) -> str:
     workspace = Path(workspace_dir)
-    workspace.mkdir()
+    workspace.mkdir(exist_ok=True)
 
     data_dir = workspace / "data"
-    data_dir.mkdir()
+    data_dir.mkdir(exist_ok=True)
     results_dir = workspace / "results"
-    results_dir.mkdir()
+    results_dir.mkdir(exist_ok=True)
 
     # data
     create_datadir(corpus_file, data_dir, test_size, train_corpus, test_corpus)
@@ -33,6 +33,8 @@ def main(
     os.chdir(workspace)
 
     runpy.run_module("seq2annotation.trainer.cli", run_name="__main__")
+
+    return workspace / "results" / "deliverable_model_dir"
 
 
 if __name__ == "__main__":

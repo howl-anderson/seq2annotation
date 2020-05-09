@@ -1,18 +1,21 @@
 import sys
 import shutil
+from typing import Union
 
 from tokenizer_tools.tagset.offset.corpus import Corpus
 from pathlib import Path
 
 
 def main(
-    corpus_file=None,
-    datadir=None,
-    test_size=0.1,
+    corpus_file: str = None,
+    datadir: str = None,
+    test_size: Union[int, float] = 0.1,
     train_corpus: str = None,
     test_corpus: str = None,
 ):
     result_dir = Path(datadir)
+
+    corpus = None
 
     if corpus_file:
         corpus = Corpus.read_from_file(corpus_file)
@@ -23,7 +26,7 @@ def main(
     else:
         train = Corpus.read_from_file(train_corpus)
         test = Corpus.read_from_file(test_corpus)
-        docs = [doc for doc in train_corpus] + [doc for doc in test_corpus]
+        docs = [doc for doc in train] + [doc for doc in test]
         corpus = Corpus(docs)
 
         shutil.copy(train_corpus, datadir)

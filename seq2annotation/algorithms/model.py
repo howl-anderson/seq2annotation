@@ -263,21 +263,44 @@ class Model(object):
                     # return tf.estimator.EstimatorSpec(
                     #     self.mode, loss=loss, eval_metric_ops=metrics, evaluation_hooks=[hook])
 
-
                     return tf.estimator.EstimatorSpec(
                         self.mode, loss=loss, eval_metric_ops=metrics
-                        )
+                    )
 
             elif self.mode == tf.estimator.ModeKeys.TRAIN:
+                optimizer_params = self.params.get("optimizer_params", {})
+                global_step=tf.train.get_or_create_global_step()
+
+                # apply learning rate decay if it's setup already.
+                lr_decay_params = optimizer_params.pop("learning_rate_exp_decay", {})
+                if lr_decay_params:
+                    learning_rate = tf.train.exponential_deacy(
+                        lr_decay_params["learning_rate"],
+                        global_step,
+                        decay_steps=lr_decay_params["lr_decay_steps"],
+                        decay_rate=lr_decay_params["lr_decay_rate"],
+                        staircase=lr_decay_params.get("staircase", True),
+                    )
+                    optimizer_params["learning_rate"] = learning_rate
+
                 var_list = None
-                if self.params["warm_start_dir"]:
-                    output_vars1 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="task_dependent")
-                    output_vars2 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="task_independent/Variable_1")
-                    var_list=[output_vars1, output_vars2]
+                if self.params["warm_start_dir"] and self.params.get("freeze_embedding", False):
+                    output_vars1 = tf.get_collection(
+                        tf.GraphKeys.TRAINABLE_VARIABLES, scope="task_dependent"
+                    )
+                    output_vars2 = tf.get_collection(
+                        tf.GraphKeys.TRAINABLE_VARIABLES,
+                        scope="task_independent/Variable_1",
+                    )
+                    var_list = [output_vars1, output_vars2]
 
                 train_op = tf.train.AdamOptimizer(
-                    **self.params.get("optimizer_params", {})
-                ).minimize(loss, global_step=tf.train.get_or_create_global_step(), var_list=var_list)
+                    **optimizer_params
+                ).minimize(
+                    loss,
+                    global_step=global_step,
+                    var_list=var_list,
+                )
 
                 if self.params["use_tpu"]:
                     train_op = tf.contrib.tpu.CrossShardOptimizer(train_op)

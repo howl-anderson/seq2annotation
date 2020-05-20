@@ -1,0 +1,55 @@
+# Data source
+data_source_scheme: local
+train: "./data/train.conllx"
+test: "./data/test.conllx"
+tags: "./data/entity.txt"
+vocabulary_file: "./data/unicode_char_list.txt"
+shuffle_pool_size: 1000
+
+# model configure
+batch_size: 32
+epochs: 4
+intent_field: label
+max_steps:
+max_steps_without_increase: 15000
+embedding_dim: 300
+lstm_size: 100
+use_attention_layer: false
+max_sentence_len: 45
+bilstm_stack_config: [
+  {units: 100},
+  # {units: 100, activation: 'seq2annotation.tf.python.keras.activations.relu6', recurrent_activation: 'seq2annotation.tf.python.keras.activations.relu6'},
+]
+use_batch_normalization_after_embedding: false
+use_batch_normalization_after_bilstm: false
+crf_params: {use_boundary: true}
+
+optimizer_params:
+  # static learning rate
+  learning_rate: 0.01
+
+  # learning rate deacy setting will override static learning rate
+  learning_rate_exp_decay: 
+    learning_rate: 0.001
+    lr_decay_steps: 2000
+    lr_decay_rate: 0.99
+    staircase: true
+
+# loading variable weights from checkpoint from specific dir
+warm_start_dir: ""
+# freeze the embedding layer
+freeze_embedding: false
+
+
+# Data output
+result_dir: "./results"
+params_log_file: "./results/params.json"
+model_dir: "./results/model_dir"
+h5_model_file: "./results/h5_model/model.h5"
+saved_model_dir: "./results/saved_model"
+deliverable_model_dir: "./results/deliverable_model"
+summary_log_dir: "./results/summary_log_dir"
+
+# checkpoint
+save_checkpoints_secs: 60
+throttle_secs: 60

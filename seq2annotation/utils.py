@@ -5,7 +5,9 @@ from typing import Text, Any, Type
 
 
 def remove_files_in_dir(data_dir):
-    input_file_list = [i.absolute() for i in pathlib.Path(data_dir).iterdir() if i.is_file()]
+    input_file_list = [
+        i.absolute() for i in pathlib.Path(data_dir).iterdir() if i.is_file()
+    ]
     for i in input_file_list:
         os.remove(i)
 
@@ -31,6 +33,24 @@ def create_dir_if_needed(directory):
     return directory
 
 
+def create_or_rm_dir_if_needed(directory):
+    # copied from https://stackoverflow.com/questions/273192/how-can-i-safely-create-a-nested-directory-in-python
+    import shutil
+
+    # if not os.path.exists(directory):
+    if not os.path.exists(directory):
+        # os.makedirs(directory)
+        os.makedirs(directory)
+    else:
+        shutil.rmtree(directory)
+        try:
+            os.makedirs(directory)
+        except:
+            pass
+
+    return directory
+
+
 def create_file_dir_if_needed(file):
     directory = os.path.dirname(file)
 
@@ -52,7 +72,7 @@ def class_from_module_path(module_path: Text) -> Type[Any]:
 
     # load the module, will raise ImportError if module cannot be loaded
     if "." in module_path:
-        module_name, _, class_name = module_path.rpartition('.')
+        module_name, _, class_name = module_path.rpartition(".")
         m = importlib.import_module(module_name)
         # get the class, will raise AttributeError if class cannot be found
         return getattr(m, class_name)
@@ -63,7 +83,7 @@ def class_from_module_path(module_path: Text) -> Type[Any]:
 def load_hook(hook_config):
     hook_instances = []
     for i in hook_config:
-        class_ = class_from_module_path(i['class'])
-        hook_instances.append(class_(**i.get('params', {})))
+        class_ = class_from_module_path(i["class"])
+        hook_instances.append(class_(**i.get("params", {})))
 
     return hook_instances

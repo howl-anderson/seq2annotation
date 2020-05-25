@@ -2,12 +2,13 @@ import sys
 
 import deliverable_model.serving as dm
 from tokenizer_tools.tagset.offset.corpus import Corpus
+from micro_toolkit.sys import argv
 
 
-def main(model_dir, gold_corpus_file, predicted_corpus_file):
+def main(model_dir, gold_corpus_file, predicted_corpus_file, install_dependencies=True):
     gold_corpus = Corpus.read_from_file(gold_corpus_file)
 
-    dm_model = dm.load(model_dir)
+    dm_model = dm.load(model_dir, install_dependencies=install_dependencies)
 
     docs = []
     docs_failed = []
@@ -41,5 +42,6 @@ if __name__ == "__main__":
     model_dir = sys.argv[1]
     gold_corpus_file = sys.argv[2]
     predicted_corpus_file = sys.argv[3]
+    install_dependencies = argv.get_argv(4, True)
 
-    main(model_dir, gold_corpus_file, predicted_corpus_file)
+    main(model_dir, gold_corpus_file, predicted_corpus_file, bool(install_dependencies))

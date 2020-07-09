@@ -10,36 +10,45 @@ shuffle_pool_size: 1000
 batch_size: 32
 epochs: 4
 intent_field: label
-max_steps:
+max_steps: 
 max_steps_without_increase: 15000
 embedding_dim: 300
 lstm_size: 100
 use_attention_layer: false
 max_sentence_len: 45
-bilstm_stack_config: [
-  {units: 100},
-  # {units: 100, activation: 'seq2annotation.tf.python.keras.activations.relu6', recurrent_activation: 'seq2annotation.tf.python.keras.activations.relu6'},
-]
+bilstm_stack_config:
+- units: 100
+# - units: 100
+# - activation: 'seq2annotation.tf.python.keras.activations.relu6'
+# - recurrent_activation: 'seq2annotation.tf.python.keras.activations.relu6'
 use_batch_normalization_after_embedding: false
 use_batch_normalization_after_bilstm: false
-crf_params: {use_boundary: true}
+crf_params:
+  use_boundary: true
 
 optimizer_params:
   # static learning rate
   learning_rate: 0.01
 
   # learning rate deacy setting will override static learning rate
-  learning_rate_exp_decay: 
+  learning_rate_exp_decay:
     learning_rate: 0.001
     lr_decay_steps: 2000
     lr_decay_rate: 0.99
     staircase: true
 
+train_hooks:
+- function: tensorflow.estimator.experimental.stop_if_no_increase_hook
+  params:
+    metric_name: f1
+    min_steps: 1000
+    run_every_secs: 120
+    max_steps_without_increase: 1000
+
 # loading variable weights from checkpoint from specific dir
 warm_start_dir: ""
 # freeze the embedding layer
 freeze_embedding: false
-
 
 # Data output
 result_dir: "./results"

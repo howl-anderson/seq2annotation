@@ -109,36 +109,46 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
     #     run_every_secs=hook_params['run_every_secs']
     # )
 
-    # build hooks from config
-    train_hook = []
-    for i in config.get("train_hook", []):
-        class_ = class_from_module_path(i["class"])
-        params = i["params"]
-        if i.get("inject_whole_config", False):
-            params["config"] = config
-        train_hook.append(class_(**params))
+    # build train hooks from config
+    train_hooks = []
+    for hook in config.get("train_hooks", []):
+        clazz = hook["class"] if hook.get("class") else hook["function"]
+        print("creating hook: {}".format(clazz))
+        class_ = class_from_module_path(clazz)
 
-    eval_hook = []
-    for i in config.get("eval_hook", []):
-        class_ = class_from_module_path(i["class"])
-        params = i["params"]
-        if i.get("inject_whole_config", False):
-            params["config"] = config
-        eval_hook.append(class_(**params))
+        params = hook["params"]
+
+        # inject estimator
+        params["estimator"] = estimator
+
+        train_hooks.append(class_(**params))
+
+    # build eval hooks from config
+    eval_hooks = []
+    for hook in config.get("eval_hooks", []):
+        clazz = hook["class"] if hook.get("class") else hook["function"]
+        class_ = class_from_module_path(clazz)
+
+        params = hook["params"]
+
+        # inject estimator
+        params["estimator"] = estimator
+
+        eval_hooks.append(class_(**params))
 
     if eval_inpf:
         train_spec = tf.estimator.TrainSpec(
-            input_fn=train_inpf, hooks=train_hook, max_steps=config["max_steps"]
+            input_fn=train_inpf, hooks=train_hooks, max_steps=config["max_steps"]
         )
         eval_spec = tf.estimator.EvalSpec(
-            input_fn=eval_inpf, throttle_secs=config["throttle_secs"], hooks=eval_hook
+            input_fn=eval_inpf, throttle_secs=config["throttle_secs"], hooks=eval_hooks
         )
         evaluate_result, export_results = tf.estimator.train_and_evaluate(
             estimator, train_spec, eval_spec
         )
     else:
         estimator.train(
-            input_fn=train_inpf, hooks=train_hook, max_steps=config["max_steps"]
+            input_fn=train_inpf, hooks=train_hooks, max_steps=config["max_steps"]
         )
         evaluate_result, export_results = {}, None
 

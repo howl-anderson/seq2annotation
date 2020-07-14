@@ -26,7 +26,9 @@ class Model:
         else:
             endpoint = None
 
-        self.dm_model = dm.load(model_dir, endpoint)
+        install_pkg = bool(os.getenv("INSTALL_PKG", True))
+
+        self.dm_model = dm.load(model_dir, endpoint, install_pkg)
 
     def parse(self, query, single_query=False):
         request = dm.make_request(query=query)

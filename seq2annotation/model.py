@@ -60,9 +60,9 @@ class Model(object):
             "saved_model_dir": utils.join_path(result_dir, "saved_model"),
             "hook": {
                 "stop_if_no_increase": {
-                    "min_steps": 100,
-                    "run_every_secs": 60,
-                    "max_steps_without_increase": 20,
+                    "min_steps": 1000,
+                    "run_every_secs": 120,
+                    "max_steps_without_increase": 1000,
                 }
             },
             "train_spec": {"max_steps": 5000},
@@ -78,6 +78,7 @@ class Model(object):
             "train_hook": {},
             "shuffle_pool_size": 30,
             "embedding_dim": 64,
+            "warm_start_dir": None,
         }
 
         vocab_data_file = self.native_config.get("vocabulary_file")

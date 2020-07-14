@@ -17,14 +17,29 @@ lstm_size: 100
 use_attention_layer: false
 max_sentence_len: 45
 bilstm_stack_config: [
-{units: 100},
-# {units: 100, activation: 'seq2annotation.tf.python.keras.activations.relu6', recurrent_activation: 'seq2annotation.tf.python.keras.activations.relu6'},
+  {units: 100},
+  # {units: 100, activation: 'seq2annotation.tf.python.keras.activations.relu6', recurrent_activation: 'seq2annotation.tf.python.keras.activations.relu6'},
 ]
 use_batch_normalization_after_embedding: false
 use_batch_normalization_after_bilstm: false
 crf_params: {use_boundary: true}
-learning_rate:
-warm_start_dir: 
+
+optimizer_params:
+  # static learning rate
+  learning_rate: 0.01
+
+  # learning rate deacy setting will override static learning rate
+  learning_rate_exp_decay: 
+    learning_rate: 0.001
+    lr_decay_steps: 2000
+    lr_decay_rate: 0.99
+    staircase: true
+
+# loading variable weights from checkpoint from specific dir
+warm_start_dir: ""
+# freeze the embedding layer
+freeze_embedding: false
+
 
 # Data output
 result_dir: "./results"

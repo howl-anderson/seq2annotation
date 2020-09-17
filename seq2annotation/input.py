@@ -50,7 +50,7 @@ def generator_func(data_generator_func, config):
 
 
 def parse_fn(offset_data):
-    tags = offset_to_biluo(offset_data)
+    tags = offset_to_biluo(offset_data)[0]
     words = offset_data.text
     assert len(words) == len(tags), "Words and tags lengths don't match"
 

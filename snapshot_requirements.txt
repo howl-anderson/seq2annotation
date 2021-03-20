@@ -41,7 +41,7 @@ importlib-metadata==0.22
 -e git+git@github.com:howl-anderson/ioflow.git@a77938ebcd6c12391e40fb3de6c166f66a80c6da#egg=ioflow
 isort==4.3.21
 itsdangerous==1.1.0
-Jinja2==2.10.1
+Jinja2==2.11.3
 joblib==0.13.2
 jsonlines==1.2.0
 Keras==2.2.4

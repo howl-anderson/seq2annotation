@@ -93,7 +93,7 @@ requests==2.22.0
 requests-mock==1.7.0
 requests-toolbelt==0.9.1
 rfc3986==1.3.2
-rsa==4.0
+rsa==4.7
 scikit-learn==0.21.3
 scipy==1.3.0
 -e git+git@github.com:howl-anderson/seq2annotation.git@faeec18f16b73a28dc323572f416341b2c1ac7ed#egg=seq2annotation

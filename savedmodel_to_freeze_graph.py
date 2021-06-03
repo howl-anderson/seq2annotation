@@ -5,7 +5,7 @@ from tensorflow.python.framework import graph_util
 # bugfix; related to bug (about BlockLSTM): https://github.com/tensorflow/tensorflow/issues/23369
 tf.contrib.rnn
 
-export_dir = "/home/howl/workshop/seq2annotation_ner_on_ecarx/results/saved_model/BilstmCrfModel-64-0.001-None-15000/1564714194"
+export_dir = "path/to/somewhere"
 
 with tf.Session(graph=tf.Graph()) as sess:
     meta_graph_def = tf.saved_model.loader.load(sess, [tag_constants.SERVING], export_dir)
